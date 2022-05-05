@@ -109,8 +109,8 @@
     display: none;
     border: none;
     background: #f9f9f9;
-    min-height: 740px;
-    min-width: 740px;
+    min-height:920px;
+    min-width: 920px;
   }
   .accordion-item__label, .accordion-item__container {
     padding: 0;
