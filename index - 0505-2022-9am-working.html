@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - Mobile First Accordion to Tabs</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link rel="stylesheet" href="css/style-lr.css">
+
+<script>
+  var inboundChar;
+    var outboundChar;
+    var device;
+    
+    // Define the CodeLess UUIDs 
+    var CODELESS_SVC_UUID 	= "866d3b04-e674-40dc-9c05-b7f91bec6e83";
+    var INBOUND_CHAR_UUID 	= "914f8fb9-e8cd-411d-b7d1-14594de45425";
+    var OUTBOUND_CHAR_UUID 	= "3bb535aa-50b2-4fbe-aa09-6b06dc59a404";
+    var CNTRL_CHAR_UUID		= "e2048b39-d4f9-4a45-9f25-1856c10d5639";
+  
+    let options = {
+        filters: [
+        {name: 'PULS'},
+        {name: 'PULS-BT'},
+        {name: 'CLv2'},					
+        {name: 'ABCa'},
+        {name: 'ABC1'},
+        {name: 'PMBT'},
+		{name: 'ABC1'},
+		{name: 'PULSARBT'},
+		{name: 'PULSAR-BT'},
+		{name: 'CodeLess'},		
+        {name: 'Example1'},
+        {name: 'Example2'},
+        {name: 'Example3'},
+        {name: 'Example4'},
+        {name: 'Example5'},
+        {name: 'Example6'},
+        {name: 'Example7'},
+        {name: 'Example8'},
+        {name: 'Example9'},
+        {name: 'CodeLess'},        
+        {services: [CODELESS_SVC_UUID]}
+        ],
+        optionalServices: [CODELESS_SVC_UUID]
+    }
+  
+    // Global variables
+    var button_press = 0;
+    var length_var, distance_var, volume_var, compensated_var, mA_output_var, temperature_var, date_var, time_var, gate_start, gate_stop, echo_var, noise_var, status_var, near_blanking_var, far_blanking_var, empty_distance, mode_var, bit0, bit1, bit2, bit3, bit4, bit5, bit6, bit7;
+    length_var = 0.000;//4.346;
+    distance_var = 0.000;//1.654;
+    volume_var = 0.000;//2.370;
+    compensated_var = 7.2;
+    mA_output_var = 0.000;//20.000;
+    temperature_var = 0.000;//20.000;
+    date_var = 190100.000;
+    time_var = 2210.000;
+    gate_start = 0;//202;
+    gate_stop = 0;//258;
+    echo_var = 0;//45;
+    noise_var = 0;//30;
+    status_var = 999;
+    near_blanking_var = 0.3;
+    far_blanking_var = 20.0;//6.0;
+    far_blanking_dist = 7.2;
+    empty_distance = 6.0;
+    mode_var = 6.0;
+
+    // set interval
+    var echo_tid;
+    var datem_tid;
+    var isDisconnecting=0;
+
+    var login_stage = 0;    // Login status
+
+
+// Incoming GATT notification was received
+async function incomingData(event){
+      // Read data from BLE CodeLess peer
+      let readInValue = await outboundChar.readValue();
+      let decoder = new TextDecoder('utf-8');
+      // var checkBox = document.getElementById("myCheck");
+      const doc_value = document.getElementById('cmd').value;
+      const string_check =  decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');
+//alert('incoming data');
+//alert(string_check);
+//alert(login_stage);
+   // alert(' incoming data'+button_press+' '+ login_stage +' ' +string_check);
+      // if ((checkBox.checked == true) && (button_press == 8))
+      // {
+      //   var hex = Uint8tohex(readInValue);
+      //   if(doc_value == "GET ECHO")
+      //     log(" <- ECHO Received");
+      //   else if (doc_value == "GET DATEM")
+      //     log(" <- DATEM Received");
+      //   else
+      //     log(" <- " + hex);
+      // }
+      // else 
+      if ((button_press == 10) || (button_press == 11) || ((button_press == 8) && ((doc_value == "GET ECHO") || (doc_value == "GET DATEM"))))
+      {
+        var hex = Uint8tohex(readInValue);
+        if((button_press == 10) || ((button_press == 8) && (doc_value == "GET ECHO")))
+          log(" <- ECHO Received");
+        else if ((button_press == 11) || ((button_press == 8) && (doc_value == "GET DATEM")))
+          log(" <- DATEM Received");        
+      }
+      else
+      { 
+        if(string_check.includes("Entered PASSTHROUGH mode"))
+        {
+            login_stage = 2;
+            log(" <- Log in Success");
+        }
+        else if(string_check.includes("Logged In Success") || (string_check.includes("OK")  && login_stage == 1)){
+          closeForm();
+          if(isDisconnecting == 0){
+            log(" <- Connected");
+            sendATL('AT+PT=1');
+            setTimeout(trace_button_check, 1000);
+          }else {
+            log(" <- disconnecting");
+          }
+        }
+        else if( ( string_check.includes("ERROR") || string_check.includes("Logged In failed")) && login_stage == 1 )
+        {
+            document.getElementById('lblpsw').innerHTML ='login failed';
+            document.getElementById('lblpsw').style.color = "red";
+            document.getElementById("pswbox").value='';
+            //alert(string_check);
+           // alert(login_stage);
+            openForm();
+        }
+        else{
+            // Log the incoming string (format slightly)
+              log(" <- " + decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0',''));   
+          
+        }
+        
+      }
+    }
+  
+    async function onDisconnected()
+    {
+      log("Bluetooth connection terminated!");
+      button_press=0;
+      login_stage = 0;
+      isDisconnecting=0; // completed
+    }
+    
+    async function bleTDisconnect()
+    {
+      if (device.gatt.connected) {
+          device.gatt.disconnect();
+      }
+      else {
+          log('> Bluetooth Device is already disconnected');
+      }
+      button_press=0;
+      login_stage = 0;
+      isDisconnecting=0; // completed
+    }
+
+  
+    async function bleDisconnect()
+    {
+
+      //trace_off();      
+      sendATL('AT+PT=0'); //--> BB: commented
+      //closeForm();
+      log(" -> Disconnecting");
+      isDisconnecting=1;
+      setTimeout(bleTDisconnect,3000);
+    }
+  
+
+
+  // Send an AT command to the CodeLess BLE peer
+  async function sendATL(cmd) {
+    //alert(cmd);
+      // Display the command in the log
+      if(cmd === 'AT+PT=1'){
+          log(' -> Logging ...'   );
+      }
+      else if(cmd.includes("AT+AUTH="))      
+      {
+      }
+      else 
+          log(' -> Connecting ...'   );
+
+      // Append an extra character as expected by CodeLess
+      var commandToSend = cmd + "\0";
+      try{
+        let encoder = new TextEncoder('utf-8');
+        // Send command via GATT Write request 
+        await inboundChar.writeValue(encoder.encode(commandToSend));
+      } 
+      catch(error) {
+        log('Failed: ' + error);
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      async function ble_connect() {
+      // closeForm();
+      try {
+        // Define a scan filter and prepare for interaction with Codeless Service
+          log('Requesting Bluetooth Device...');
+          device = await navigator.bluetooth.requestDevice(options);
+          log('Name: ' + device.name);
+  
+        device.addEventListener('gattserverdisconnected', onDisconnected);	
+        // Connect to device GATT and perform attribute discovery
+        server = await device.gatt.connect();
+        const service = await server.getPrimaryService(CODELESS_SVC_UUID);
+        inboundChar = await service.getCharacteristic(INBOUND_CHAR_UUID);
+        outboundChar = await service.getCharacteristic(OUTBOUND_CHAR_UUID);
+        const flowcontrolChar = await service.getCharacteristic(CNTRL_CHAR_UUID);
+        await flowcontrolChar.startNotifications();
+        flowcontrolChar.addEventListener('characteristicvaluechanged', incomingData);
+        log('Ready to communicate!\n');
+        login_stage = 1;
+        sendATL('AT+AUTH=123321'); //--> BB: commented
+        // sendATL('AT+AUTH=123654'); //--> BB: commented
+        button_press = 3;
+      }
+      catch(error) {
+        log('Failed: ' + error);
+      }
+    }
+
+
+
+
+        // Display text in log field text area 
+    function log(text)
+    {
+      var textarea = document.getElementById('log');
+      if(textarea.value == "")
+        textarea.value = text;
+      else
+        textarea.value += "\n" + text;	  
+      textarea.scrollTop = textarea.scrollHeight;
+    }
+
+    // Clears text in log field text area 
+    function clearlog()
+    {
+      var textarea = document.getElementById('log');
+      textarea.value = "";	  
+      textarea.scrollTop = textarea.scrollHeight;
+    }    
+  
+
+
+
+</script>
+
+
+</head>
+<body> 
+<!-- partial:index.partial.html -->
+<section class="accordion">
+    <section class="accordion-tabs">
+      <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0">Tab 1</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="1">Tab 2</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="2">Tab 3</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="3">Tab 4</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="4">Tab 5</button>
+    </section>
+    <section class="accordion-content">
+
+      <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
+        <h4 class="accordion-item__label">Tab 1</h4>
+        <div class="accordion-item__container">
+          						<table>
+                            <tr>
+                                <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
+                                <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td> 
+                                <!-- <td><button type="button" class="button button-style1" onclick="sendATL('AT+AUTH=123321');  button_press = 3">Test-Login</button></td> -->
+                                <!-- <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td> -->
+                            </tr>                    
+					          </table>
+
+                    <table>           
+                      <tr>
+                          <td>
+                            <textarea id="log" class="textarea" rows="8" cols="31" style="font-size: 10pt; font-weight: bold" readonly></textarea></td>
+                          <td>                                 
+                           <div class='wrap'>
+                            <div class = "blocks" id='lvl'></div>
+                            <div class = "blocks" id='dist'></div>
+                            <div class = "blocks" id='sensor_status'></div>
+                            <textarea id="data-log" class="textarea1" rows="1" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                          </div>
+
+                           </td>
+                           
+                      </tr>
+
+                  </table>                    
+        </div>
+      </article>
+
+      <article class="accordion-item" data-actab-group="0" data-actab-id="1">
+        <h4 class="accordion-item__label">Tab 2</h4>
+        <div class="accordion-item__container">
+          <p>reprehenderit temporibus, assumenda cupiditate consequatur soluta odit ex repudiandae delectus cumque, provident hic sed quod? Quis, nam. Similique eaque quae vel recusandae expedita qui sint fugiat, nisi assumenda et ex molestiae atque deleniti magni, ipsam libero!</p>
+        </div>
+      </article>
+      <article class="accordion-item" data-actab-group="0" data-actab-id="2">
+        <h4 class="accordion-item__label">Tab 3</h4>
+        <div class="accordion-item__container">
+          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates, deserunt minima? Ut facere minus, ipsa dolore animi quis alias eos, porro corporis quod esse quidem. Maxime a aperiam perspiciatis architecto?</p>
+        </div>
+      </article>
+      <article class="accordion-item" data-actab-group="0" data-actab-id="3">
+        <h4 class="accordion-item__label">Tab 4</h4>
+        <div class="accordion-item__container">
+          <p>psum dolor sit amet, consectetur adipisicing elit. Voluptates, deserunt minima? Ut facere minus, ipsa dolore</p>
+        </div>
+      </article>
+      <article class="accordion-item" data-actab-group="0" data-actab-id="4">
+        <h4 class="accordion-item__label">Tab 5</h4>
+        <div class="accordion-item__container">
+          <p>aborum similique facere quae. Quo cupiditate ad iste qui aliquam quibusdam quod, ut doloremque ipsa quas soluta, sapiente possimus, tempora rerum ab nesciunt vitae molestiae dolor earum illum repudiandae! Voluptas sed, soluta facere nisi perferendis cupiditate! Dicta et praesentium non ab, quod commodi, illo saepe accusantium tempora autem eos nemo. Animi, pariatur placeat laudantium dolorib!</p>
+        </div>
+      </article>
+    </section>
+  </section>
+
+<!-- <p>Scale down the browser to view the mobile version</p> -->
+<!-- partial -->
+  <script  src="js/script-lr.js"></script>
+
+</body>
+</html>
