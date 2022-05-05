@@ -110,8 +110,8 @@
     display: none;
     border: none;
     background: #668992;
-    min-height:920px;  /*change here for the content width and height */
-    min-width: 1020px;
+    min-height:960px;  /*change here for the content width and height */
+    min-width: 1240px;
   }
   .accordion-item__label, .accordion-item__container {
     padding: 0;
