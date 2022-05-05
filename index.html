@@ -11,8 +11,28 @@
 </noscript>  
   <link rel="stylesheet" href="css/style-lr.css">
 
+  <style>
+    .my_text
+    {
+      /* font-size: 44px; */
+  font-family: Arial, sans-serif; 
+   /* text-align: center;  */
+  /* justify-content: center; */
+   /* color: #ffffff; */
+        /* font-family:    Arial, Helvetica, sans-serif; */
+        font-size:      40px;
+        font-weight:    bold;
+        /* border: 1px solid #FFFF00; */
+        width: 63%;
+        padding: 5px 10px;
+    }
+    /* .center {
+      border: 5px solid #FFFF00;
+      padding: 50px 0;
+    } */
+</style>
 
-
+<link rel="icon" type="image/x-icon" href="./img/pulsaricon-rgb64_2.png" /> 
 </head>
 <body>
 <!-- partial:index.partial.html -->
@@ -25,7 +45,43 @@
       <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
         <h4 class="accordion-item__label">Tab 1</h4>
         <div class="accordion-item__container">
-          <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptates, deserunt minima? Ut facere minus, ipsa dolore animi quis alias eos, porro corporis quod esse quidem. Maxime a aperiam perspiciatis architecto?</p>
+          						<table>
+                            <tr>
+                                <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
+                                <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td> 
+                                <!-- <td><button type="button" class="button button-style1" onclick="sendATL('AT+AUTH=123321');  button_press = 3">Test-Login</button></td> -->
+                                <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td>
+                            </tr>                    
+					          </table>
+                    <div class="form-popup" id="myForm">
+                      <form action="" class="form-container">
+                        <h1>Login</h1>            
+                        <label for="email"><b>Email</b></label>
+                        <input type="text" placeholder="Enter Email" name="email" required>
+                        <label for="psw" id="lblpsw" ><b>Passcode</b></label>
+                        <input type="password" placeholder="Enter Passcode" id="pswbox" name="psw" required>            
+                        <button type="button" class="btn" onclick=" sendLoginCmd(); closeForm2();  closeForm();">Login</button>
+                        <button type="button" class="btn cancel" onclick="closeForm()">Close</button> 
+                      </form>
+                    </div>
+                    <table>           
+                      <tr>
+                          <td>
+                            <textarea id="log" class="textarea" rows="8" cols="31" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                          </td>
+                          <td>                                 
+                            <div class='wrap'>
+                              <div class = "blocks" id='lvl'></div>
+                              <div class = "blocks" id='dist'></div>
+                              <div class = "blocks" id='sensor_status'></div>
+                              <textarea id="data-log" class="textarea1" rows="1" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                            </div>
+                          </td>                           
+                      </tr>
+                  </table>
+                  
+   
+
         </div>
       </article>
       <article class="accordion-item" data-actab-group="0" data-actab-id="1">
