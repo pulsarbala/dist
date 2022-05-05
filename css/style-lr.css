@@ -101,7 +101,7 @@
     border-right: 0;
   }
   .accordion-tabs .accordion-tab.accordion-active {
-    background: #f9f9f9;
+    background: #6b7d80d5;
   }
 
   
@@ -109,7 +109,7 @@
     padding: 2.4rem;
     display: none;
     border: none;
-    background: #f9f9f9;
+    background: #668992;
     min-height:920px;  /*change here for the content width and height */
     min-width: 1020px;
   }
