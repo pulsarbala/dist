@@ -138,10 +138,10 @@
   max-width: 740px;
 }
 @media (min-width: 600px) {
-  .accordion {
+  /* .accordion {
     max-width: 740px;
     
-  }
+  } */
 }
 .accordion + p {
   color: rgba(255, 255, 255, 0.8);
