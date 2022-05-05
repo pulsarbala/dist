@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Pulsar Bluetooth Remote Access</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css"><link rel="stylesheet" href="./style-lr2.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+	<link rel="stylesheet" href="./style-lr2.css">
   <noscript>
     <link rel="stylesheet" href="css/skel-noscript.css" />
     <link rel="stylesheet" href="css/style.css" />
@@ -327,23 +328,190 @@ async function incomingData(event){
 	}  
 	</style>
 
+
+<style>
+  .container1{
+    display: flex;
+  }
+  .fixed{
+      width: 200px;
+  }
+  .flex-item{
+      flex-grow: 1;
+  }
+
+  .blocks {
+    display: inline-block; 
+    /* border: solid 2px red;    */
+    padding: 16px 20px;
+    display: flex;
+      align-items: left;
+      justify-content: left;
+      margin: 0 auto;
+    height:50px; 
+    width: 300px;
+    font-weight: bold;
+    color: whitesmoke;
+    /* font-family: "verdana"; */
+    font-size: 1.8em;
+    overflow: hidden;
+  /*Hide content before animation*/
+    /* border-right: .1em solid white; */
+  /*Cursor*/
+    white-space: nowrap;
+  /*Keep text on same line*/
+    margin: 0 auto;
+  /*Scrolling effect while typing*/
+    letter-spacing: .1em;
+    animation: typing 3s steps(30, end), blink-caret .75s steps(1, end) infinite alternate;    
+  }
+.wrap{
+    width:210px;    
+}
+ 
+/* Button used to open the contact form - fixed at the bottom of the page */
+.open-button {
+  background-color: #555;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.8;
+  position: fixed;
+  bottom: 23px;
+  right: 28px;
+  width: 280px;
+}
+
+ /* The popup form - hidden by default */
+  .form-popup {
+    display: none;
+    /* position: fixed; */
+    position: relative;    
+    right: 0px;
+    bottom: 0px;
+    top: 0px;
+    left: 0px;
+    width: 508px;
+    max-width: 600px;
+    border: 1px solid #03681cd0;
+    z-index: 9;
+}
+
+  /* Add styles to the form container */
+  .form-container {
+    max-width: 600px;
+    width: 505px;
+    padding: 10px;
+    background-color: white;
+  }
+  
+  /* Full-width input fields */
+  .form-container input[type=text], .form-container input[type=password] {
+    width: 100%;
+    padding: 15px;
+    margin: 5px 0 22px 0;
+    border: none;
+    background: #f1f1f1;
+  }
+  
+  /* When the inputs get focus, do something */
+  .form-container input[type=text]:focus, .form-container input[type=password]:focus {
+    background-color: #ddd;
+    outline: none;
+  }
+  
+  /* Set a style for the submit/login button */
+  .form-container .btn {
+    background-color: #04AA6D;
+    color: rgb(255, 255, 255);
+    padding: 16px 20px;
+    border: none;
+    cursor: pointer;
+    width: 50%;
+    margin-bottom:10px;
+    opacity: 0.8;    
+  }
+  
+  /* Add a red background color to the cancel button */
+  .form-container .cancel {
+    background-color: red;
+  }
+  
+  /* Add some hover effects to buttons */
+  .form-container .btn:hover, .open-button:hover {
+    opacity: 1;
+  }
+</style>
+
+
+<script>
+  function openForm() {
+    document.getElementById("myForm").style.display = "block";
+  }
+
+  function sendLoginCmd() {
+    //alert("sendLoginCmd"+'AT+AUTH='+document.getElementById("pswbox").value);
+    sendATL('AT+AUTH='+document.getElementById("pswbox").value);
+  }
+  function closeForm2() {
+    document.getElementById('lblpsw').innerHTML ='';
+    document.getElementById('lblpsw').style.color = "black";
+  }
+  
+  function closeForm() {
+    
+    document.getElementById("myForm").style.display = "none";
+  }
+  </script>
+
+
+<style>
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  th, td {
+    text-align: left;
+    padding: 8px;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #D6EEEE;
+  }
+  </style>
 <link rel="icon" type="image/x-icon" href="./img/pulsaricon-rgb64_2.png" /> 
 </head>
 <body>
 <!-- partial:index.partial.html -->
 <section class="accordion">
 <section id="header">
-
+    <table>
+      <tr style="width:100%">
+          <td>
               <div class="logo">
                 <a href="http://www.pulsarmeasurement.com" style="text-decoration:none;">
                   <img src="./img/pulsarlogo-old.svg"  alt="Logo" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
                 </a>
               </div>
+          </td>
+
+          <td>
             <div class="my_text">
               REFLECT
             </div>
-
-</section>
+          </td>            
+          <td>
+             <div class="logo1">
+              <a href="http://www.pulsarmeasurement.com" style="text-decoration:none;">
+                <img src="./img/dbr16.png"  alt="Logo" style=" width: 90px;;height: 90px;;border:none;text-decoration:none;color:#eeeeee00;"> 
+              </a>
+            </div>
+          </td>
+          </tr>
+      </table>            
+    </section>
     <section class="accordion-tabs">
       <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0">Home</button>
       <button class="accordion-tab" data-actab-group="0" data-actab-id="1">Trace</button>
@@ -360,7 +528,17 @@ async function incomingData(event){
                                 <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td>
                             </tr>                    
 					          </table>
-
+                    <div class="form-popup" id="myForm">
+                      <form action="" class="form-container">
+                        <h1>Login</h1>            
+                        <label for="email"><b>Email</b></label>
+                        <input type="text" placeholder="Enter Email" name="email" required>
+                        <label for="psw" id="lblpsw" ><b>Passcode</b></label>
+                        <input type="password" placeholder="Enter Passcode" id="pswbox" name="psw" required>            
+                        <button type="button" class="btn" onclick=" sendLoginCmd(); closeForm2();  closeForm();">Login</button>
+                        <button type="button" class="btn cancel" onclick="closeForm()">Close</button> 
+                      </form>
+                    </div>
                     <table>           
                       <tr>
                           <td>
