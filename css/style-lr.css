@@ -138,10 +138,10 @@
   max-width: 740px;
 }
 @media (min-width: 600px) {
-  /* .accordion {
+  .accordion {
     max-width: 740px;
     
-  } */
+  }
 }
 .accordion + p {
   color: rgba(255, 255, 255, 0.8);
@@ -157,7 +157,7 @@ body {
   font-size: 1rem;
   justify-content: center;
   align-items: center;
-  height: 110vh; 
+  height: 240vh; 
 }
 
 
