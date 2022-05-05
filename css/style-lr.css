@@ -1,6 +1,6 @@
 .accordion { 
   background: #656db3;
-  min-width: 920px;
+  min-width: 820px;
 }
 .accordion-tabs {
   display: none;
@@ -110,7 +110,7 @@
     display: none;
     border: none;
     background: #f9f9f9;
-    min-height:1020px;
+    min-height:920px;  /*change here for the content width and height */
     min-width: 1020px;
   }
   .accordion-item__label, .accordion-item__container {
