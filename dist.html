@@ -441,16 +441,16 @@ async function incomingData(event){
     {
       sendATL('AT+PT=0'); //--> BB: commented
       isDisconnecting=1;
-      setTimeout(bleTDisconnect,1000);
+      setTimeout(bleTDisconnect,2000);
     }
 
     async function bleDisconnect()
-    {      
+    { 
+      sendAT('TRACE OFF');     
       clearTimeout(echo_tid);
-      clearTimeout(datem_tid);
-      sendAT('TRACE OFF');
+      clearTimeout(datem_tid);      
       log(" -> Disconnecting");
-      setTimeout(bleT1Disconnect,1000);
+      setTimeout(bleT1Disconnect,2000);
     }
   
 
