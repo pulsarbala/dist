@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Pulsar Bluetooth Remote Access</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-	<link rel="stylesheet" href="./style-lr2.css">
+	<link rel="stylesheet" href="css/style-lr2.css">
   <noscript>
     <link rel="stylesheet" href="css/skel-noscript.css" />
     <link rel="stylesheet" href="css/style.css" />
@@ -34,9 +34,16 @@
 </style>
 
 <script>
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+</script>
+
+<script>
   var inboundChar;
     var outboundChar;
     var device;
+    var isIgnore=0;
     
     // Define the CodeLess UUIDs 
     var CODELESS_SVC_UUID 	= "866d3b04-e674-40dc-9c05-b7f91bec6e83";
@@ -73,6 +80,7 @@
   
     // Global variables
     var button_press = 0;
+    var isTraceOn = 0;
     var length_var, distance_var, volume_var, compensated_var, mA_output_var, temperature_var, date_var, time_var, gate_start, gate_stop, echo_var, noise_var, status_var, near_blanking_var, far_blanking_var, empty_distance, mode_var, bit0, bit1, bit2, bit3, bit4, bit5, bit6, bit7;
     length_var = 0.000;//4.346;
     distance_var = 0.000;//1.654;
@@ -104,8 +112,9 @@
     function echo_start() {
     // do some stuff...
     // no need to recall the function (it's an interval, it'll loop forever)
-    if(login_stage == 2) {
+    if(login_stage == 4) { // TRACE ON state  
         sendAT('GET ECHO');
+        // alert("sendAT('GET ECHO') : 1");
         button_press = 10;
         datem_tid = setInterval(datem_start, 5000);
         clearTimeout(echo_tid);
@@ -115,7 +124,7 @@
         }
     }
     function datem_start() {
-        if(login_stage == 2) {
+        if(login_stage == 4) { // TRACE ON state  
             sendAT('GET DATEM');
             button_press = 11;
             echo_tid = setInterval(echo_start, 5000);
@@ -127,13 +136,15 @@
     }
 
     function trace_button_check() {
-     // alert("trace_button_check :"+login_stage);
-        if(login_stage == 2 || login_stage == 1) {
+      // alert("trace_button_check :"+login_stage);
+        if(login_stage == 3 || login_stage == 1 || login_stage == 2) {
           if(isDisconnecting == 0){
               log(' <- TRACE ON');
               sendAT('GET ECHO');
+              document.getElementById("id_trace").click();
               button_press = 10;
-              datem_tid = setInterval(datem_start, 5000);            
+              datem_tid = setInterval(datem_start, 5000); 
+              login_stage = 4; // TRACE ON state
           }
         } else {
             log('Device not in passthrough mode!');
@@ -144,9 +155,12 @@
         clearTimeout(echo_tid);
         clearTimeout(datem_tid);
         log(' <- TRACE OFF');
+        login_stage = 3; // back to the PT mode
+        isIgnore=1;
+        // isTraceOn=1;
     }
 
-    function enter_button_check() {
+    function send_command() {
         if(login_stage >= 1) {
             sendAT(document.getElementById('cmd').value); 
             button_press = 8;
@@ -171,19 +185,6 @@
       }
       return r;
     }
-    // Function to detect iOS platform
-    // function iOS() {
-    //   return [
-    //     'iPad Simulator',
-    //     'iPhone Simulator',
-    //     'iPod Simulator',
-    //     'iPad',
-    //     'iPhone',
-    //     'iPod'
-    //   ].includes(navigator.platform)
-    //   // iPad on iOS 13 detection
-    //   || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
-    // }
 
     // Function to flip the hex string (if needed)
     function flipHexString(hexValue, hexDigits) {
@@ -221,9 +222,7 @@
         // a.push(s.getUint8(i));
         a.push('0x' + ('00' + s.getUint8(i).toString(16)).slice(-2));
       }
-      // console.log(a);
-      // console.log(echo);
-      // console.log(datem);
+ 
       
       if((((doc_value == "GET ECHO") || (doc_value == "GET DATEM") && (button_press == 8)) || (button_press == 10) || (button_press == 11)) && (s.byteLength == 246)) {
         // Populate the dynamic variables
@@ -233,8 +232,6 @@
         compensated_var = hexToFloat('0x' + ('00' + s.getUint8(12).toString(16)).slice(-2) + ('00' + s.getUint8(13).toString(16)).slice(-2) + ('00' + s.getUint8(14).toString(16)).slice(-2) + ('00' + s.getUint8(15).toString(16)).slice(-2));
         mA_output_var = hexToFloat('0x' + ('00' + s.getUint8(16).toString(16)).slice(-2) + ('00' + s.getUint8(17).toString(16)).slice(-2) + ('00' + s.getUint8(18).toString(16)).slice(-2) + ('00' + s.getUint8(19).toString(16)).slice(-2));
         temperature_var = hexToFloat('0x' + ('00' + s.getUint8(20).toString(16)).slice(-2) + ('00' + s.getUint8(21).toString(16)).slice(-2) + ('00' + s.getUint8(22).toString(16)).slice(-2) + ('00' + s.getUint8(23).toString(16)).slice(-2));
-        // date_var = hexToFloat('0x' + ('00' + s.getUint8(24).toString(16)).slice(-2) + ('00' + s.getUint8(25).toString(16)).slice(-2) + ('00' + s.getUint8(26).toString(16)).slice(-2) + ('00' + s.getUint8(27).toString(16)).slice(-2));
-        // time_var = hexToFloat('0x' + ('00' + s.getUint8(28).toString(16)).slice(-2) + ('00' + s.getUint8(29).toString(16)).slice(-2) + ('00' + s.getUint8(30).toString(16)).slice(-2) + ('00' + s.getUint8(31).toString(16)).slice(-2));
         gate_start = s.getUint8(24)*256 + s.getUint8(25); //s.getUint8(32)*256 + s.getUint8(33);
         gate_stop = s.getUint8(26)*256 + s.getUint8(27);  //s.getUint8(34)*256 + s.getUint8(35);
         echo_var = s.getUint8(28)*256 + s.getUint8(29);   //s.getUint8(36)*256 + s.getUint8(37);
@@ -320,6 +317,7 @@
                       status_str= "Status\t\t: " + status_var + "\n\n";
               }
               document.getElementById("sensor_status").innerHTML = "<span style='font-sze:12px; color: black; '>"+status_str+"</span>";
+              document.getElementById("sensor_status_t").innerHTML = "<span style='font-sze:12px; color: black; '>"+status_str+"</span>";
             }
 
         
@@ -332,9 +330,14 @@
         textarea.value += "Temperature\t= " + temperature_var.toFixed(2) + " °C" + "\n";
         // textarea.value += "Noise\t\t= " + noise_var.toFixed(0) + " mV" + "\n";
         textarea.value += "Output\t\t= " + mA_output_var.toFixed(2) + " mA";
-        
- 
-        textarea.scrollTop = textarea.scrollHeight;
+
+        // on the trace tab
+        document.getElementById("lvl_t").innerHTML = "<span style='font-sze:12px; color: black; '>"+level_str+"</span>";
+        document.getElementById("dist_t").innerHTML = "<span style='font-sze:12px;color: black;  '>"+dist_str+"</span>";      
+        var textarea1 = document.getElementById('data-log_t');
+        textarea1.value = "";
+        textarea1.scrollTop = textarea.scrollHeight;
+        textarea1.value=textarea.value;
     }
 
 
@@ -350,21 +353,18 @@ async function incomingData(event){
       // var checkBox = document.getElementById("myCheck");
       const doc_value = document.getElementById('cmd').value;
       const string_check =  decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');
-//alert('incoming data');
-//alert(string_check);
-//alert(login_stage);
-   // alert(' incoming data'+button_press+' '+ login_stage +' ' +string_check);
-      // if ((checkBox.checked == true) && (button_press == 8))
-      // {
-      //   var hex = Uint8tohex(readInValue);
-      //   if(doc_value == "GET ECHO")
-      //     log(" <- ECHO Received");
-      //   else if (doc_value == "GET DATEM")
-      //     log(" <- DATEM Received");
-      //   else
-      //     log(" <- " + hex);
-      // }
-      // else 
+      // alert("button_press="+button_press+" readInValue="+readInValue+"login_stage="+login_stage+" string_check="+string_check);
+      // alert(login_stage + " " +isIgnore);
+      // alert(string_check + "1");
+      if( (login_stage==3) && (isIgnore==1) )
+      {
+          //alert(string_check + "1");
+          isIgnore=0;
+          // sleep for 2 seconds
+          await sleep(2 * 1000);
+         // return;
+      }
+      
       if ((button_press == 10) || (button_press == 11) || ((button_press == 8) && ((doc_value == "GET ECHO") || (doc_value == "GET DATEM"))))
       {
         var hex = Uint8tohex(readInValue);
@@ -377,16 +377,23 @@ async function incomingData(event){
       { 
         if(string_check.includes("Entered PASSTHROUGH mode"))
         {
-            login_stage = 2;
-            log(" <- Log in Success");
+            login_stage = 3; // Entered PT mode
+            log(" <- Log in Success");            
+        }
+        else if(string_check.includes("Exit PASSTHROUGH mode")){          
+          //alert("Exit : isIgnore="+isIgnore+" login_stage="+login_stage+" isDisconnecting="+isDisconnecting+" string_check="+string_check);
+          login_stage = 0;
         }
         else if(string_check.includes("Logged In Success") || (string_check.includes("OK")  && login_stage == 1)){
+          login_stage = 2;  // Logged in success mode
           closeForm();
           if(isDisconnecting == 0){
             log(" <- Connected");
             sendATL('AT+PT=1');
             setTimeout(trace_button_check, 1000);
           }else {
+            await sleep(2 * 1000);
+            alert(isDisconnecting+" ::"+string_check);
             log(" <- disconnecting");
           }
         }
@@ -395,16 +402,15 @@ async function incomingData(event){
             document.getElementById('lblpsw').innerHTML ='login failed';
             document.getElementById('lblpsw').style.color = "red";
             document.getElementById("pswbox").value='';
-            //alert(string_check);
-           // alert(login_stage);
             openForm();
         }
         else{
+         // alert(string_check+" last");
             // Log the incoming string (format slightly)
-              log(" <- " + decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0',''));   
-          
-        }
-        
+            var res=decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');
+               log(" <- [last]" + sizeof(res) + " "+res);
+              await sleep(2 * 1000);
+        }        
       }
     }
   
@@ -432,7 +438,7 @@ async function incomingData(event){
   
     async function bleDisconnect()
     {
-
+      
       //trace_off();      
       sendATL('AT+PT=0'); //--> BB: commented
       //closeForm();
@@ -445,10 +451,9 @@ async function incomingData(event){
 
   // Send an AT command to the CodeLess BLE peer
   async function sendATL(cmd) {
-    //alert(cmd);
-      // Display the command in the log
       if(cmd === 'AT+PT=1'){
           log(' -> Logging ...'   );
+          isIgnore=1;
       }
       else if(cmd.includes("AT+AUTH="))      
       {
@@ -487,8 +492,8 @@ async function incomingData(event){
         flowcontrolChar.addEventListener('characteristicvaluechanged', incomingData);
         log('Ready to communicate!\n');
         login_stage = 1;
-        sendATL('AT+AUTH=123321'); //--> BB: commented
-        // sendATL('AT+AUTH=123654'); //--> BB: commented
+        // sendATL('AT+AUTH=123321'); //--> BB: commented
+        sendATL('AT+AUTH=123654'); //--> BB: commented
         button_press = 3;
       }
       catch(error) {
@@ -540,6 +545,20 @@ async function sendAT(cmd) {
     }
 </script>
 
+<script>
+
+
+  function search(ele) {    
+    if(event.key === 'Enter') {
+        //alert(ele.value);
+        event.preventDefault();        
+        document.getElementById("btnLogin").click();        
+    }
+}
+
+  </script>
+  
+
 
 <style>
 	.button {
@@ -563,7 +582,7 @@ async function sendAT(cmd) {
         border: none;
         /* color: white; */
         /* padding: 10px 30px; */
-        height:  248px;
+        height:  270px;
         width: 273px;
         text-align: left;
         text-decoration: none;
@@ -578,7 +597,7 @@ async function sendAT(cmd) {
         border: none;
         /* color: white; */
         /* padding: 10px 30px; */
-        height:  100px;
+        height:  170px;
         width: 273px;
         text-align: left;
         text-decoration: none;
@@ -610,10 +629,10 @@ async function sendAT(cmd) {
     align-items: left;
     justify-content: left;
     margin: 0 auto;
-    height:50px; 
-    width: 300px;
+    /* height:50px; 
+    width: 100px; */
     font-weight: bold;
-    color: whitesmoke;
+    color: rgb(0, 0, 0);
     /* font-family: "verdana"; */
     font-size: 1.8em;
     overflow: hidden;
@@ -781,7 +800,8 @@ async function sendAT(cmd) {
           <td>
              <div class="logo1">
               <a href="https://pulsarmeasurement.com/dbr-radar" style="text-decoration:none;">
-                <img src="./img/dbr16.png"  alt="Logo" style=" width: 90px;;height: 90px;;border:none;text-decoration:none;color:#eeeeee00;"> 
+                <!-- <img src="./img/dbr16.png"  alt="Logo" style=" width: 90px;;height: 90px;;border:none;text-decoration:none;color:#eeeeee00;">  -->
+                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleDisconnect();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
               </a>
             </div>
           </td>
@@ -789,87 +809,103 @@ async function sendAT(cmd) {
       </table>            
     </section>
     <section class="accordion-tabs">
-      <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0">Home</button>
-      <button class="accordion-tab" data-actab-group="0" data-actab-id="1">Trace</button>
+      <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0" id="id_home">Home</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="1" id="id_trace">Trace</button>
     </section>
     <section class="accordion-content">
       <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
         <h4 class="accordion-item__label"></h4><!-- IMPORTANT : donot remove this tag-->
         <div class="accordion-item__container">
-
-
           <table>
-            <tr>
-                
+            <tr>               
                 <td></td><td></td>
                 <td></td><td></td>
                 <td></td><td></td>                                
                 <!-- <td><button type="button" class="button button-style1" onclick="sendATL('AT+AUTH=123321');  button_press = 3">Test-Login</button></td> -->
-                <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td>
+                <!-- <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td> -->
             </tr>                    
-      </table>
+          </table>
                     <div class="form-popup" id="myForm">
                       <form action="" class="form-container">
                         <h1>Login</h1>            
                         <!-- <label for="email"><b>Email</b></label>
                         <input type="text" placeholder="Enter Email" name="email" required> -->
-                        <!-- <label for="psw" id="lblpsw" ><b>Passcode</b></label> -->
-                        <input type="password" placeholder="Enter Passcode" id="pswbox" name="psw" required>            
-                        <button type="button" class="btn" onclick=" closeForm(); sendLoginCmd(); closeForm2();  ">Login</button>
+                        <label for="psw" id="lblpsw" ><b>Passcode</b></label>
+                        <input type="password" placeholder="Enter Passcode" id="pswbox" name="psw" onkeydown="search(this)" required>            
+                        <button type="button" id="btnLogin" class="btn" onclick=" closeForm(); sendLoginCmd(); closeForm2();  ">Login</button>
                         <!-- <button type="button" class="btn cancel" onclick="closeForm()">Close</button>  -->
                       </form>
-                    </div>
-
-
-                    
-                    <table>           
-                      <tr>
-                          <td>
-                            
-                          </td>
-                          <td>
-                            <div  >
-                            </div>
-                          </td>                           
-                      </tr>
-                  </table>
-
-
-
+                    </div>                    
+                    <table><tr><td></td><td><div></div></td></tr></table>
    
-                  <table style="width:100%">
+                  <table style="width:66%">
                     <tr>
                       <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
-                      <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td>                     </tr>
+                      <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td>
+                    </tr>
                     <tr>
                       <td>
-                        <textarea id="log" class="textarea" rows="8" cols="31" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                        <textarea id="log" class="textarea" rows="8" cols="8" style="font-size: 10pt; font-weight: bold" readonly></textarea>
                       </td>                      
                       <td>
                         <div class = "blocks" id='lvl'></div>
                         <div class = "blocks" id='dist'></div>
                         <div class = "blocks" id='sensor_status'></div>
-                        <textarea id="data-log" class="textarea1" rows="1" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
-                      </td>
-                      <td>
-                        
+                        <textarea id="data-log" class="textarea1" rows="4" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
                       </td>
                     </tr>
                   </table>
+                  <table><tr><td></td><td><div></div></td></tr></table>
+                  <table style="width:66%">
+                  <tr>
+                    <td><input type="text" id="cmd" class = "blocks" onkeydown="wasEnter(this)"></td>
+                    <td>
+                        <button type="button" class="button" onclick="send_command();">
+                            SEND
+                        </button>
+                      </td>                          
+                      <td>
+                        <button type="button" class="button" onclick="clearlog(); button_press = 9">
+                          CLEAR
+                      </button>
+                    </td>
+                    <td> 
+                    </td>
+                  </tr>                      
+                  </table>
+                  <table style="width:102%">
+                    <tr>               
+                        <td></td><td></td>
+                        <td></td><td></td>
+                        <td></td><td></td>                                
+                        <td style="position: right;">
+                          <button type="button" class="button button-style1" onclick="trace_off(); button_press = 3">TRACE OFF</button>
+                        </td>
+                    </tr>                    
+                  </table>
           </div>
       </article>
-
       <article class="accordion-item" data-actab-group="0" data-actab-id="1">
-        <h4 class="accordion-item__label"> </h4><!-- IMPORTANT : donot remove this tag-->
+        <h4 class="accordion-item__label"> </h4> <!-- IMPORTANT : donot remove this tag-->
         <div class="accordion-item__container">
+          <table>
+            <tr>               
+                <td></td><td></td>
+                <td></td><td></td>
+                <td></td><td></td>                                
+                 <!-- <td><button type="button" class="button button-style1" onclick="sendATL('AT+AUTH=123321');  button_press = 3">Test-Login</button></td> -->
+            </tr>                    
+          </table>
 
           <!-- <p>reprehenderit temporibus, assumenda cupiditate consequatur soluta odit ex repudiandae delectus cumque, provident hic sed quod? Quis, nam. Similique eaque quae vel recusandae expedita qui sint fugiat, nisi assumenda et ex molestiae atque deleniti magni, ipsam libero!</p> -->
            <!-- start of trace box --> 
-           <table> <!-- check here: start of the trace box -->
+           <table style="width:66%"> <!-- check here: start of the trace box -->
             <tr>
-                <div class="chartBox" style="position: relative; margin: auto; height:300px; width:550px">
+              <td>
+                <div class="chartBox" style="position: left; margin: auto; height:100%; width:100%">
                     <canvas id="myChart"></canvas>
-                </div>   
+                </div>  
+              </td>                 
                 <!-- Offline mode -->
                 <script src="./js/chart.js"></script>
                 <script>
@@ -1046,20 +1082,7 @@ async function sendAT(cmd) {
                 );
                 </script>
             </tr>
-            <tr>
-                <td><input type="text" id="cmd" onkeydown="wasEnter(this)"></td>
-                <td>
-                    <button type="button" class="button" onclick="enter_button_check();">
-                        SEND
-                    </button>
-                    <button type="button" class="button" onclick="clearlog(); button_press = 9">
-                      CLEAR
-                  </button>                    
-                </td>
-                <td>
- 
-                </td>   
-            </tr>
+            
             <!-- <tr>
                 <td>
                     <button type="button" class="button" onclick="sendAT('ATrI'); button_press = 4">
@@ -1077,46 +1100,25 @@ async function sendAT(cmd) {
                         GET ECHO
                     </button>
                 </td>               
-            </tr> -->
-            <tr>
-                <!-- <td>
-                    <button type="button" class="button" onclick="trace_button_check();">
-                        TRACE ON
-                    </button>
-                </td> -->                                
-                <td>
-                    <button type="button"  class="button" onclick="trace_off();">
-                        TRACE OFF
-                    </button>
-                </td>
-                <!-- <td>
-                    <button type="button" class="button" onclick="sendAT('GET DATEM'); button_press = 11">
-                        GET DATEM
-                    </button>
-                </td>                  						 -->
-            </tr>
-</table>
-
-
-
+            </tr> -->          
+    </table>
            <!-- end of the trace box-->
-
-
-
-
-
-
-
-
-
-
-
-
-
         </div>
+
+        <table style="width:60%">
+          <tr>              
+              <td>
+                <div class = "blocks" id='lvl_t'> </div>
+                <div class = "blocks" id='dist_t'> </div>
+                <div class = "blocks" id='sensor_status_t'> </div>          
+              </td>
+              <td>
+                <textarea id="data-log_t" class="textarea1" rows="4" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+              </td>
+          </tr>
+        </table>
       </article>
     </section>
-
     <div>
       <table>
         <tr>
@@ -1127,6 +1129,6 @@ async function sendAT(cmd) {
       </table>
     </div>
   </section>
-  <script  src="./script-lr2.js"></script>
+  <script  src="js/script-lr2.js"></script>
 </body>
 </html>
