@@ -74,6 +74,7 @@
 @media (min-width: 600px) {
   .accordion-tabs {
     display: flex;
+    border-radius: 10px;
     background: rgba(68, 127, 255, 0.1);
   }
   .accordion-tabs .accordion-tab {
