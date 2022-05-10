@@ -319,13 +319,13 @@
                   else
                       status_str= "Status\t\t: " + status_var + "\n\n";
               }
-              document.getElementById("sensor_status").innerHTML = "<span style='font-sze:12px; background-colour: black;'>"+status_str+"</span>";
+              document.getElementById("sensor_status").innerHTML = "<span style='font-sze:12px; color: black; '>"+status_str+"</span>";
             }
 
         
         
-        document.getElementById("lvl").innerHTML = "<span style='font-sze:12px; background-colour: black;'>"+level_str+"</span>";
-        document.getElementById("dist").innerHTML = "<span style='font-sze:12px; background-colour: black;'>"+dist_str+"</span>";        
+        document.getElementById("lvl").innerHTML = "<span style='font-sze:12px; color: black; '>"+level_str+"</span>";
+        document.getElementById("dist").innerHTML = "<span style='font-sze:12px;color: black;  '>"+dist_str+"</span>";        
         
 
         textarea.value += "Volume\t\t= " + volume_var.toFixed(3) + " m³" + "\n";
@@ -587,6 +587,7 @@ async function sendAT(cmd) {
         margin: 4px 2px;
         cursor: pointer;
         resize: none;
+        left:10px;
 	}  
 	</style>
 
@@ -604,11 +605,11 @@ async function sendAT(cmd) {
   .blocks {
     display: inline-block; 
     /* border: solid 2px red;    */
-    padding: 16px 20px;
+    /* padding: 16px 20px; */
     display: flex;
-      align-items: left;
-      justify-content: left;
-      margin: 0 auto;
+    align-items: left;
+    justify-content: left;
+    margin: 0 auto;
     height:50px; 
     width: 300px;
     font-weight: bold;
@@ -795,17 +796,18 @@ async function sendAT(cmd) {
       <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
         <h4 class="accordion-item__label"></h4><!-- IMPORTANT : donot remove this tag-->
         <div class="accordion-item__container">
-          						<table>
-                            <tr>
-                                <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
-                                <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td> 
-                                <td></td><td></td>
-                                <td></td><td></td>
-                                <td></td><td></td>                                
-                                <!-- <td><button type="button" class="button button-style1" onclick="sendATL('AT+AUTH=123321');  button_press = 3">Test-Login</button></td> -->
-                                <!-- <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td> -->
-                            </tr>                    
-					          </table>
+
+
+          <table>
+            <tr>
+                
+                <td></td><td></td>
+                <td></td><td></td>
+                <td></td><td></td>                                
+                <!-- <td><button type="button" class="button button-style1" onclick="sendATL('AT+AUTH=123321');  button_press = 3">Test-Login</button></td> -->
+                <td><button type="button" class="button button-style1" onclick="openForm();  button_press = 3">Login</button></td>
+            </tr>                    
+      </table>
                     <div class="form-popup" id="myForm">
                       <form action="" class="form-container">
                         <h1>Login</h1>            
@@ -817,32 +819,51 @@ async function sendAT(cmd) {
                         <!-- <button type="button" class="btn cancel" onclick="closeForm()">Close</button>  -->
                       </form>
                     </div>
+
+
+                    
                     <table>           
                       <tr>
                           <td>
-                            <textarea id="log" class="textarea" rows="8" cols="31" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                            
                           </td>
-                          <td>                                 
-                            <div class='wrap'>
-                              <div class = "blocks" id='lvl'></div>
-                              <div class = "blocks" id='dist'></div>
-                              <div class = "blocks" id='sensor_status'></div>
-                              <textarea id="data-log" class="textarea1" rows="1" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                          <td>
+                            <div  >
                             </div>
                           </td>                           
                       </tr>
                   </table>
-                  
-   
 
-        </div>
+
+
+   
+                  <table style="width:100%">
+                    <tr>
+                      <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
+                      <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td>                     </tr>
+                    <tr>
+                      <td>
+                        <textarea id="log" class="textarea" rows="8" cols="31" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                      </td>                      
+                      <td>
+                        <div class = "blocks" id='lvl'></div>
+                        <div class = "blocks" id='dist'></div>
+                        <div class = "blocks" id='sensor_status'></div>
+                        <textarea id="data-log" class="textarea1" rows="1" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                      </td>
+                      <td>
+                        
+                      </td>
+                    </tr>
+                  </table>
+          </div>
       </article>
 
       <article class="accordion-item" data-actab-group="0" data-actab-id="1">
         <h4 class="accordion-item__label"> </h4><!-- IMPORTANT : donot remove this tag-->
         <div class="accordion-item__container">
 
-          <p>reprehenderit temporibus, assumenda cupiditate consequatur soluta odit ex repudiandae delectus cumque, provident hic sed quod? Quis, nam. Similique eaque quae vel recusandae expedita qui sint fugiat, nisi assumenda et ex molestiae atque deleniti magni, ipsam libero!</p>
+          <!-- <p>reprehenderit temporibus, assumenda cupiditate consequatur soluta odit ex repudiandae delectus cumque, provident hic sed quod? Quis, nam. Similique eaque quae vel recusandae expedita qui sint fugiat, nisi assumenda et ex molestiae atque deleniti magni, ipsam libero!</p> -->
            <!-- start of trace box --> 
            <table> <!-- check here: start of the trace box -->
             <tr>
@@ -1031,11 +1052,12 @@ async function sendAT(cmd) {
                     <button type="button" class="button" onclick="enter_button_check();">
                         SEND
                     </button>
+                    <button type="button" class="button" onclick="clearlog(); button_press = 9">
+                      CLEAR
+                  </button>                    
                 </td>
                 <td>
-                    <button type="button" class="button" onclick="clearlog(); button_press = 9">
-                        CLEAR
-                    </button>
+ 
                 </td>   
             </tr>
             <!-- <tr>
