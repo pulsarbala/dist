@@ -152,7 +152,6 @@ function sleep(ms) {
     }
 
     function trace_off() {
-        sendAT('TRACE OFF');
         clearTimeout(echo_tid);
         clearTimeout(datem_tid);
         log(' <- TRACE OFF');
@@ -427,7 +426,6 @@ async function incomingData(event){
     {
       if (device.gatt.connected) {
           device.gatt.disconnect();
-          log(" -> Disconnected");
       }
       else {
           log('> Bluetooth Device is already disconnected');
@@ -437,20 +435,16 @@ async function incomingData(event){
       isDisconnecting=0; // completed
     }
 
-    async function bleT1Disconnect()
+  
+    async function bleDisconnect()
     {
-      sendATL('AT+PT=0'); //--> BB: commented
+      
+      // trace_off();      
+      // sendATL('AT+PT=0'); //--> BB: commented
+      //closeForm();
+      log(" -> Disconnecting");
       isDisconnecting=1;
       setTimeout(bleTDisconnect,1000);
-    }
-
-    async function bleDisconnect()
-    {      
-      clearTimeout(echo_tid);
-      clearTimeout(datem_tid);
-      sendAT('TRACE OFF');
-      log(" -> Disconnecting");
-      setTimeout(bleT1Disconnect,1000);
     }
   
 
