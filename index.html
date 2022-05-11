@@ -328,7 +328,7 @@ function sleep(ms) {
         
 
         textarea.value += "Volume\t\t= " + volume_var.toFixed(3) + " m³" + "\n";
-        textarea.value += "Temperature\t= " + temperature_var.toFixed(2) + " °C" + "\n";
+        textarea.value += "Temp.\t\t= " + temperature_var.toFixed(2) + " °C" + "\n";
         // textarea.value += "Noise\t\t= " + noise_var.toFixed(0) + " mV" + "\n";
         textarea.value += "Output\t\t= " + mA_output_var.toFixed(2) + " mA";
 
@@ -441,18 +441,32 @@ async function incomingData(event){
     {
       sendATL('AT+PT=0'); //--> BB: commented
       isDisconnecting=1;
-      setTimeout(bleTDisconnect,1000);
+      setTimeout(bleTDisconnect,2000);
     }
 
     async function bleDisconnect()
-    {      
+    { 
+      sendAT('TRACE OFF');     
       clearTimeout(echo_tid);
-      clearTimeout(datem_tid);
-      sendAT('TRACE OFF');
+      clearTimeout(datem_tid);      
       log(" -> Disconnecting");
-      setTimeout(bleT1Disconnect,1000);
+      setTimeout(bleT1Disconnect,2000);
     }
   
+    async function bleExitPage(){
+      bleDisconnect();
+
+      setTimeout(bleExitPage,2000);
+    }
+
+    async function bleExitPage(){
+
+
+
+    }
+
+
+    
 
 
   // Send an AT command to the CodeLess BLE peer
@@ -572,18 +586,18 @@ async function sendAT(cmd) {
         border: none;
         color: white;
 	    /* padding: 15px 32px; */
-        height:50px;
-        width:165px;
+        height:100px;
+        width: 280px;
         /* width:160px; */
         text-align: center;
         text-decoration: none;
         display: inline-block;
-        font-size: 120px;
+        font-size: 36px;
         margin: 4px 2px;
         cursor: pointer;
         border-radius: 8px;
 	}
-	.textarea {
+	.textarea_c {
         background-color: white;
         border: none;
         /* color: white; */
@@ -593,7 +607,7 @@ async function sendAT(cmd) {
         text-align: left;
         text-decoration: none;
         display: inline-block;
-        font-size: 120px;
+        font-size: 240px;
         margin: 4px 2px;
         cursor: pointer;
         resize: none;
@@ -608,12 +622,28 @@ async function sendAT(cmd) {
         text-align: left;
         text-decoration: none;
         display: inline-block;
-        font-size: 120px;
+        font-size: 240px;
         margin: 4px 2px;
         cursor: pointer;
         resize: none;
         left:10px;
-	}  
+	} 
+  .textarea2 {
+        background-color: white;
+        border: none;
+        /* color: white; */
+        /* padding: 10px 30px; */
+        height:  170px;
+        width:  500px;
+        text-align: left;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 240px;
+        margin: 4px 2px;
+        cursor: pointer;
+        resize: none;
+        left:10px;
+	} 
 	</style>
 
 
@@ -627,7 +657,7 @@ async function sendAT(cmd) {
   .flex-item{
       flex-grow: 1;
   }
-  .blocks {
+  .blocks_textbox {
     display: inline-block; 
     /* border: solid 2px red;    */
     /* padding: 16px 20px; */
@@ -635,12 +665,13 @@ async function sendAT(cmd) {
     align-items: left;
     justify-content: left;
     margin: 0 auto;
-    /* height:50px; 
-    width: 100px; */
+    height:50px; 
+    width: 100px;
     font-weight: bold;
+    font-size:medium;
     color: rgb(0, 0, 0);
     /* font-family: "verdana"; */
-    font-size: 1.8em;
+    font-size: 4.5em;
     overflow: hidden;
   /*Hide content before animation*/
     /* border-right: .1em solid white; */
@@ -652,6 +683,59 @@ async function sendAT(cmd) {
     letter-spacing: .1em;
     animation: typing 3s steps(30, end), blink-caret .75s steps(1, end) infinite alternate;    
   }
+  
+  .blocks {
+    display: inline-block; 
+    /* border: solid 2px red;    */
+    /* padding: 16px 20px; */
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    margin: 0 auto;
+    /* height:50px; 
+    width: 100px; */
+    font-weight: bold;
+ 
+    color: rgb(0, 0, 0);
+    /* font-family: "verdana"; */
+    font-size: 3.5em;
+    overflow: hidden;
+  /*Hide content before animation*/
+    /* border-right: .1em solid white; */
+  /*Cursor*/
+    white-space: nowrap;
+  /*Keep text on same line*/
+    margin: 0 auto;
+  /*Scrolling effect while typing*/
+    letter-spacing: .1em;
+    animation: typing 3s steps(30, end), blink-caret .75s steps(1, end) infinite alternate;    
+  }
+  .blocks_txtarea {
+    display: inline-block; 
+    /* border: solid 2px red;    */
+    /* padding: 16px 20px; */
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    margin: 0 auto;
+    /* height:50px; 
+    width: 100px; */
+    font-weight: bold;
+    font-size:medium;
+    color: rgb(0, 0, 0);
+    /* font-family: "verdana"; */
+    font-size: 4.5em;
+    overflow: hidden;
+  /*Hide content before animation*/
+    /* border-right: .1em solid white; */
+  /*Cursor*/
+    white-space: nowrap;
+  /*Keep text on same line*/
+    margin: 0 auto;
+  /*Scrolling effect while typing*/
+    letter-spacing: .1em;
+    animation: typing 3s steps(30, end), blink-caret .75s steps(1, end) infinite alternate;    
+}
 .wrap{
     width:210px;    
 }
@@ -844,27 +928,41 @@ async function sendAT(cmd) {
                     </div>                    
                     <table><tr><td></td><td><div></div></td></tr></table>
    
-                  <table style="width:66%">
-                    <tr>
-                      <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
-                      <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <textarea id="log" class="textarea" rows="8" cols="8" style="font-size: 10pt; font-weight: bold" readonly></textarea>
-                      </td>                      
-                      <td>
-                        <div class = "blocks" id='lvl'></div>
-                        <div class = "blocks" id='dist'></div>
-                        <div class = "blocks" id='sensor_status'></div>
-                        <textarea id="data-log" class="textarea1" rows="4" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
-                      </td>
-                    </tr>
-                  </table>
+                    <table style="width:70%">
+
+                      <tr>
+                        <td><button type="button" class="button button-style1" onclick="ble_connect(); button_press = 1">Device Scan</button></td>
+                        <td><button type="button" class="button button-style1" onclick="bleDisconnect();  button_press = 2">End Session</button></td>
+                      </tr>
+  
+                      <tr>
+                        <td>
+                          <textarea id="log" class="textarea_c" rows="8" cols="10" style="font-size: 22pt; font-weight: bold; width:450px; height:430px;" readonly></textarea>
+                        </td>
+                        <td>
+              <table style="width:50%">
+              <tr>
+                            <td>
+              <div  class = "blocks" id='lvl'></div>
+                          <div  class = "blocks" id='dist'></div>
+                          <div class = "blocks" id='sensor_status'></div>
+                              </td>
+                              </tr>
+                              <tr>
+                            <td>
+  <textarea id="data-log" class="textarea2" rows="8" cols="8" style="font-size: 22pt; font-weight: bold; width:380px; height:180px;" readonly></textarea>
+                              </td>
+                              </tr>
+                          </table>
+                        </td>
+  
+  </table>
+
+                  
                   <table><tr><td></td><td><div></div></td></tr></table>
                   <table style="width:66%">
                   <tr>
-                    <td><input type="text" id="cmd" class = "blocks" onkeydown="wasEnter(this)"></td>
+                    <td><input type="text" id="cmd" style="font-size: 40pt; font-weight: bold; width:280px; height:80px;" onkeydown="wasEnter(this)"></td>
                     <td>
                         <button type="button" class="button" onclick="send_command();">
                             SEND
@@ -1119,7 +1217,7 @@ async function sendAT(cmd) {
                 <div class = "blocks" id='sensor_status_t'> </div>          
               </td>
               <td>
-                <textarea id="data-log_t" class="textarea1" rows="4" cols="1" style="font-size: 10pt; font-weight: bold" readonly></textarea>
+                <textarea id="data-log_t" class="textarea2" rows="4" cols="1" style="font-size: 22pt; font-weight: bold" readonly></textarea>                
               </td>
           </tr>
         </table>
@@ -1129,7 +1227,7 @@ async function sendAT(cmd) {
       <table>
         <tr>
           <td style=" text-align:center;font-size:24px;  background-color:#656db3;;color:#2e2323;">
-            <p style="width: 874px; text-align:center; color:#ffffff; font-size:14px;line-height:40px;">&copy; Pulsar Measurement 2022<br></p>
+            <p style="width: 874px; text-align:center; color:#ffffff; font-size:10pt;line-height:40px;">&copy; Pulsar Measurement 2022<br></p>
           </td>
         </tr>
       </table>
