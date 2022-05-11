@@ -319,15 +319,18 @@ function sleep(ms) {
               }
               document.getElementById("sensor_status").innerHTML = "<span style='font-sze:12px; color: black; '>"+status_str+"</span>";
               document.getElementById("sensor_status_t").innerHTML = "<span style='font-sze:12px; color: black; '>"+status_str+"</span>";
-            }       
+            }
+
+        
         
         document.getElementById("lvl").innerHTML = "<span style='font-sze:12px; color: black; '>"+level_str+"</span>";
-        document.getElementById("dist").innerHTML = "<span style='font-sze:12px;color: black;  '>"+dist_str+"</span>";
+        document.getElementById("dist").innerHTML = "<span style='font-sze:12px;color: black;  '>"+dist_str+"</span>";        
+        
 
-        textarea.value += "Volume\t= " + volume_var.toFixed(3) + " m³" + "\n";
+        textarea.value += "Volume\t\t= " + volume_var.toFixed(3) + " m³" + "\n";
         textarea.value += "Temp\t= " + temperature_var.toFixed(2) + " °C" + "\n";
         // textarea.value += "Noise\t\t= " + noise_var.toFixed(0) + " mV" + "\n";
-        textarea.value += "Output\t= " + mA_output_var.toFixed(2) + " mA";
+        textarea.value += "Output\t\t= " + mA_output_var.toFixed(2) + " mA";
 
         // on the trace tab
         document.getElementById("lvl_t").innerHTML = "<span style='font-sze:12px; color: black; '>"+level_str+"</span>";
@@ -934,20 +937,20 @@ async function sendAT(cmd) {
   
                       <tr>
                         <td>
-                          <textarea id="log" class="textarea_c" rows="8" cols="10" style="font-size: 16pt; font-weight: bold; width:450px; height:430px;" readonly></textarea>
+                          <textarea id="log" class="textarea_c" rows="8" cols="10" style="font-size: 22pt; font-weight: bold; width:450px; height:430px;" readonly>eeeee</textarea>
                         </td>
                         <td>
               <table style="width:50%">
               <tr>
                             <td>
-                          <div  class = "blocks" id='lvl'></div>
-                          <div  class = "blocks" id='dist'></div>
-                          <div class = "blocks" id='sensor_status'></div>
+              <div  class = "blocks" id='lvl'>lllll</div>
+                          <div  class = "blocks" id='dist'>ddddddd</div>
+                          <div class = "blocks" id='sensor_status'>ssssss</div>
                               </td>
                               </tr>
                               <tr>
-                              <td>
-                                <textarea id="data-log" class="textarea2" rows="8" cols="8" style="font-size: 22pt; font-weight: bold; width:380px; height:180px;" readonly></textarea>
+                            <td>
+  <textarea id="data-log" class="textarea2" rows="8" cols="8" style="font-size: 22pt; font-weight: bold; width:380px; height:180px;" readonly></textarea>
                               </td>
                               </tr>
                           </table>
@@ -1214,7 +1217,7 @@ async function sendAT(cmd) {
                 <div class = "blocks" id='sensor_status_t'> </div>          
               </td>
               <td>
-                <textarea id="data-log_t" class="textarea2" rows="4" cols="1" style="font-size: 22pt; font-weight: bold" readonly>data-log_t</textarea>                
+                <textarea id="data-log_t" class="textarea2" rows="4" cols="1" style="font-size: 22pt; font-weight: bold" readonly></textarea>                
               </td>
           </tr>
         </table>
