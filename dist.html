@@ -442,30 +442,44 @@ async function incomingData(event){
     }
 
     async function bleDisconnect()
-    { 
-      sendAT('TRACE OFF');     
+    {
+      sendAT('TRACE OFF');
       clearTimeout(echo_tid);
       clearTimeout(datem_tid);      
       log(" -> Disconnecting");
       setTimeout(bleT1Disconnect,2000);
     }
-  
-    async function bleExitPage(){
-      bleDisconnect();
 
-      setTimeout(bleExitPage,2000);
+    // go to the reflect manual page
+    async function bleExit1Page(){      
+      if(login_stage >0){
+        bleDisconnect();
+      }
+      login_stage=0;
+      document.location="https://pulsarmeasurement.com/dbr-radar"
     }
 
-    async function bleExitPage(){
-
-
-
+    // go to Pulsar home page  
+    async function bleExitPage(){      
+      if(login_stage >0){
+        bleDisconnect();
+      }
+      login_stage=0;
+      document.location="https://pulsarmeasurement.com"
     }
 
 
-    
+    async function bleExitPage2(){
+      if(login_stage >0){
+        bleDisconnect();
+        login_stage=0;
+      }      
+    }
 
-
+/*
+    sendATL commandto be used for only the AT+PT or AT+AUTH
+    rest, use the sendAT command
+*/
   // Send an AT command to the CodeLess BLE peer
   async function sendATL(cmd) {
       if(cmd === 'AT+PT=1'){
@@ -491,9 +505,10 @@ async function incomingData(event){
     }
 
       async function ble_connect() {
-      // closeForm();
+      
       try {
         // Define a scan filter and prepare for interaction with Codeless Service
+          log('');
           log('Requesting Bluetooth Device...');
           device = await navigator.bluetooth.requestDevice(options);
           log('Name: ' + device.name);
@@ -564,6 +579,9 @@ async function sendAT(cmd) {
 
 <script>
 
+function myLoadFunction() {  
+  log("Please click on the 'Device scan' to scan");
+}
 
   function search(ele) {    
     if(event.key === 'Enter') {
@@ -865,7 +883,8 @@ async function sendAT(cmd) {
   </style>
 <link rel="icon" type="image/x-icon" href="./img/pulsaricon-rgb64_2.png" /> 
 </head>
-<body>
+<!-- <body onload="myLoadFunction()" onbeforeunload="return bleExitPage2()"> -->
+<body onload="myLoadFunction()"></body>
 <!-- partial:index.partial.html -->
 <section class="accordion">
 <section id="header">
@@ -873,8 +892,8 @@ async function sendAT(cmd) {
       <tr style="width:100%">
           <td>
               <div class="logo">
-                <a href="http://www.pulsarmeasurement.com" style="text-decoration:none;">
-                  <img src="./img/pulsarlogo-old.svg"  alt="Logo" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
+                <a href="" style="text-decoration:none;">
+                  <img src="./img/pulsarlogo-old.svg"  alt="Logo" onclick="bleExitPage();" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
                 </a>
               </div>
           </td>
@@ -886,9 +905,9 @@ async function sendAT(cmd) {
           </td>            
           <td>
              <div class="logo1">
-              <a href="https://pulsarmeasurement.com/dbr-radar" style="text-decoration:none;">
+              <a href="" style="text-decoration:none;">
                 <!-- <img src="./img/dbr16.png"  alt="Logo" style=" width: 90px;;height: 90px;;border:none;text-decoration:none;color:#eeeeee00;">  -->
-                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleDisconnect();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
+                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleExit1Page();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
               </a>
             </div>
           </td>
@@ -1060,7 +1079,7 @@ async function sendAT(cmd) {
                         const ctx = chart.canvas.getContext('2d');
                         var { ctr, chartArea: {top, right, bottom, left, width, height}, scales:
                             {x, y} } = chart;
-                        ctx.save();            
+                        ctx.save();
                         ctx.fillStyle = 'yellow';
                         ctx.fillRect(x.getPixelForValue(0), top, near_blanking_var*width/compensated_var, height); // Near blanking area (x.getPixelForValue(0), top, 0.3*width/7.2, height)
                         ctx.fillStyle = 'yellow';
