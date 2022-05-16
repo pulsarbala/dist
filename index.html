@@ -160,7 +160,15 @@ function sleep(ms) {
         isIgnore=1;
         // isTraceOn=1;
     }
-
+    function exit_pt() {
+        sendAT('TRACE OFF');
+        clearTimeout(echo_tid);
+        clearTimeout(datem_tid);
+        log(' <- TRACE OFF');
+        login_stage = 3; // back to the PT mode
+        isIgnore=1;
+        // isTraceOn=1;
+    }
     function send_command() {
         if(login_stage >= 1) {
             sendAT(document.getElementById('cmd').value); 
@@ -981,6 +989,9 @@ async function sendAT(cmd) {
                         <td></td><td></td>                                
                         <td style="position: right;">
                           <button type="button" class="button button-style1" onclick="trace_off(); button_press = 3">TRACE OFF</button>
+                        </td>
+                        <td style="position: right;">
+                          <button type="button" class="button button-style1" onclick="trace_off(); button_press = 10">EXIT PT</button>
                         </td>
                     </tr>                    
                   </table>
