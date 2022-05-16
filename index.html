@@ -24,7 +24,7 @@
         font-size:      40px;
         font-weight:    bold;
         /* border: 1px solid #FFFF00; */
-        width: 63%;
+        width: 83%;
         padding: 5px 10px;
     }
     /* .center {
@@ -145,44 +145,59 @@ function sleep(ms) {
               button_press = 10;
               datem_tid = setInterval(datem_start, 5000); 
               login_stage = 4; // TRACE ON state
+              isTraceOn=1;
           }
         } else {
             log('Device not in passthrough mode!');
         }
     }
+    function Normal_mode() {
+        sendAT('AT+PT=0');
+        clearTimeout(echo_tid);
+        clearTimeout(datem_tid);
+        log(' <- AT+PT=0');
+        login_stage = 3; // back to the PT mode
+        // isIgnore=0;
+        // isTraceOn=1;
+    }
 
-    function trace_off() {
+    function trace_off() {  
+      //alert("trace_off: isTraceOn="+isTraceOn);
+      if(isTraceOn==1){
         sendAT('TRACE OFF');
+        document.getElementById('btn_trace').innerHTML ='TRACE ON';
         clearTimeout(echo_tid);
         clearTimeout(datem_tid);
         log(' <- TRACE OFF');
         login_stage = 3; // back to the PT mode
-        isIgnore=1;
-        // isTraceOn=1;
-    }
-    function exit_pt() {
-        sendAT('TRACE OFF');
+        isTraceOn=0;
+      }else{
+        // start the static timers
+        document.getElementById('btn_trace').innerHTML ='TRACE OFF';
+        login_stage = 3;
         clearTimeout(echo_tid);
         clearTimeout(datem_tid);
-        log(' <- TRACE OFF');
-        login_stage = 3; // back to the PT mode
-        isIgnore=1;
-        // isTraceOn=1;
+        sendAT('TRACE ON');
+        trace_button_check();
+        isTraceOn=0;
+      } 
     }
+
     function send_command() {
-        if(login_stage >= 1) {
+     // alert("send_command :"+login_stage);
+        //if(login_stage >= 1) {
             sendAT(document.getElementById('cmd').value); 
             button_press = 8;
-        }
-        else {
-            log('No device connected!');
-        }
+        //}
+        //else {
+          //  log('No device connected!');
+        //}
     }
 
 
     const utf8encoder = new TextEncoder();
     const windows1251 = new TextEncoder();
-
+    var deviceName='REFLECT';
     function utf8ToHex(s)
     {
       const rb = utf8encoder.encode(s);
@@ -359,18 +374,18 @@ async function incomingData(event){
       // var checkBox = document.getElementById("myCheck");
       const doc_value = document.getElementById('cmd').value;
       const string_check =  decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');
-      // alert("button_press="+button_press+" readInValue="+readInValue+"login_stage="+login_stage+" string_check="+string_check);
-      // alert(login_stage + " " +isIgnore);
-      // alert(string_check + "1");
+      //alert("button_press="+button_press+" readInValue="+readInValue+"login_stage="+login_stage+" string_check="+string_check);
+      //alert(login_stage + " " +isIgnore);
+     // alert(string_check + "1");
       if( (login_stage==3) && (isIgnore==1) )
       {
-          //alert(string_check + "1");
+         // alert(string_check + "2");
           isIgnore=0;
           // sleep for 2 seconds
           await sleep(2 * 1000);
-         // return;
+           return;
       }
-      
+      //alert(string_check + "2");
       if ((button_press == 10) || (button_press == 11) || ((button_press == 8) && ((doc_value == "GET ECHO") || (doc_value == "GET DATEM"))))
       {
         var hex = Uint8tohex(readInValue);
@@ -381,6 +396,7 @@ async function incomingData(event){
       }
       else
       { 
+        //alert(string_check + "3");
         if(string_check.includes("Entered PASSTHROUGH mode"))
         {
             login_stage = 3; // Entered PT mode
@@ -399,7 +415,7 @@ async function incomingData(event){
             setTimeout(trace_button_check, 1000);
           }else {
             await sleep(2 * 1000);
-            alert(isDisconnecting+" ::"+string_check);
+           // alert(isDisconnecting+" ::"+string_check);
             log(" <- disconnecting");
           }
         }
@@ -411,11 +427,13 @@ async function incomingData(event){
             openForm();
         }
         else{
-         // alert(string_check+" last");
+          //alert(string_check+"st");
+          log(" <- " + string_check );
+          //alert(string_check + "2");
             // Log the incoming string (format slightly)
-            var res=decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');
-               log(" <- [last]" + sizeof(res) + " "+res);
-              await sleep(2 * 1000);
+          //var res=decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');          
+          //log(" <- " + sizeof(res) + " "+res);
+          await sleep(2 * 1000);
         }        
       }
     }
@@ -446,34 +464,50 @@ async function incomingData(event){
     {
       sendATL('AT+PT=0'); //--> BB: commented
       isDisconnecting=1;
-      setTimeout(bleTDisconnect,2000);
+      setTimeout(bleTDisconnect,1000);
     }
 
     async function bleDisconnect()
-    { 
-      sendAT('TRACE OFF');     
+    {
+      if(login_stage == 4){
+        sendAT('TRACE OFF');
+      }      
       clearTimeout(echo_tid);
-      clearTimeout(datem_tid);      
+      clearTimeout(datem_tid);
       log(" -> Disconnecting");
-      setTimeout(bleT1Disconnect,2000);
-    }
-  
-    async function bleExitPage(){
-      bleDisconnect();
-
-      setTimeout(bleExitPage,2000);
+      setTimeout(bleT1Disconnect,1000);
     }
 
-    async function bleExitPage(){
+    // go to the reflect manual page
+    async function bleExit1Page(){      
+      if(login_stage >0){
+        bleDisconnect();
+      }
+      login_stage=0;
+      document.location="https://pulsarmeasurement.com/dbr-radar"
+    }
 
-
-
+    // go to Pulsar home page  
+    async function bleExitPage(){      
+      if(login_stage >0){
+        bleDisconnect();
+      }
+      login_stage=0;
+      document.location="https://pulsarmeasurement.com"
     }
 
 
-    
+    async function bleExitPage2(){
+      if(login_stage >0){
+        bleDisconnect();
+        login_stage=0;
+      }      
+    }
 
-
+/*
+    sendATL commandto be used for only the AT+PT or AT+AUTH
+    rest, use the sendAT command
+*/
   // Send an AT command to the CodeLess BLE peer
   async function sendATL(cmd) {
       if(cmd === 'AT+PT=1'){
@@ -499,12 +533,15 @@ async function incomingData(event){
     }
 
       async function ble_connect() {
-      // closeForm();
+      
       try {
         // Define a scan filter and prepare for interaction with Codeless Service
+          log('');
           log('Requesting Bluetooth Device...');
           device = await navigator.bluetooth.requestDevice(options);
           log('Name: ' + device.name);
+          deviceName='REFLECT '+device.name;
+          document.getElementById('id_title').innerHTML =deviceName;
   
         device.addEventListener('gattserverdisconnected', onDisconnected);	
         // Connect to device GATT and perform attribute discovery
@@ -572,6 +609,9 @@ async function sendAT(cmd) {
 
 <script>
 
+function myLoadFunction() {  
+  log("Please click on the 'Device scan' to scan");
+}
 
   function search(ele) {    
     if(event.key === 'Enter') {
@@ -873,7 +913,8 @@ async function sendAT(cmd) {
   </style>
 <link rel="icon" type="image/x-icon" href="./img/pulsaricon-rgb64_2.png" /> 
 </head>
-<body>
+<!-- <body onload="myLoadFunction()" onbeforeunload="return bleExitPage2()"> -->
+<body onload="myLoadFunction()"></body>
 <!-- partial:index.partial.html -->
 <section class="accordion">
 <section id="header">
@@ -881,22 +922,22 @@ async function sendAT(cmd) {
       <tr style="width:100%">
           <td>
               <div class="logo">
-                <a href="http://www.pulsarmeasurement.com" style="text-decoration:none;">
-                  <img src="./img/pulsarlogo-old.svg"  alt="Logo" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
+                <a href="" style="text-decoration:none;">
+                  <img src="./img/pulsarlogo-old.svg"  alt="Logo" onclick="bleExitPage();" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
                 </a>
               </div>
           </td>
 
           <td>
-            <div class="my_text">
+            <div class="my_text" id="id_title">
               REFLECT
             </div>
           </td>            
           <td>
              <div class="logo1">
-              <a href="https://pulsarmeasurement.com/dbr-radar" style="text-decoration:none;">
+              <a href="" style="text-decoration:none;">
                 <!-- <img src="./img/dbr16.png"  alt="Logo" style=" width: 90px;;height: 90px;;border:none;text-decoration:none;color:#eeeeee00;">  -->
-                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleDisconnect();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
+                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleExit1Page();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
               </a>
             </div>
           </td>
@@ -982,17 +1023,18 @@ async function sendAT(cmd) {
                     </td>
                   </tr>                      
                   </table>
-                  <table style="width:102%">
-                    <tr>               
-                        <td></td><td></td>
-                        <td></td><td></td>
-                        <td></td><td></td>                                
-                        <td style="position: right;">
-                          <button type="button" class="button button-style1" onclick="trace_off(); button_press = 3">TRACE OFF</button>
+                  <table style="width:52%;">
+                    <tr>
+                      <table style="width:30%;">
+                        <td style="position: center;">
+                          <button type="button" class="button button-style1" id="btn_trace" onclick="trace_off(); button_press=3;">TRACE OFF</button>
                         </td>
-                        <td style="position: right;">
-                          <button type="button" class="button button-style1" onclick="trace_off(); button_press = 10">EXIT PT</button>
+                        <td style="position: center;">
+                          <button type="center" class="button button-style1" onclick="Normal_mode(); button_press = 13">NORMAL MODE</button>
                         </td>
+
+                      </table>
+                      
                     </tr>                    
                   </table>
           </div>
@@ -1071,7 +1113,7 @@ async function sendAT(cmd) {
                         const ctx = chart.canvas.getContext('2d');
                         var { ctr, chartArea: {top, right, bottom, left, width, height}, scales:
                             {x, y} } = chart;
-                        ctx.save();            
+                        ctx.save();
                         ctx.fillStyle = 'yellow';
                         ctx.fillRect(x.getPixelForValue(0), top, near_blanking_var*width/compensated_var, height); // Near blanking area (x.getPixelForValue(0), top, 0.3*width/7.2, height)
                         ctx.fillStyle = 'yellow';
