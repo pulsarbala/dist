@@ -510,7 +510,7 @@ async function incomingData(event){
 */
   // Send an AT command to the CodeLess BLE peer
   async function sendATL(cmd) {
-    // alert(cmd);
+    
       if(cmd === 'AT+PT=1'){
           log(' -> Logging ...'   );
           isIgnore=1;
