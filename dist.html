@@ -44,6 +44,7 @@ function sleep(ms) {
     var outboundChar;
     var device;
     var isIgnore=0;
+    var isIgnore_2=0;
     
     // Define the CodeLess UUIDs 
     var CODELESS_SVC_UUID 	= "866d3b04-e674-40dc-9c05-b7f91bec6e83";
@@ -114,6 +115,7 @@ function sleep(ms) {
     // no need to recall the function (it's an interval, it'll loop forever)
     if(login_stage == 4) { // TRACE ON state  
         sendAT('GET ECHO');
+      //  log("1");
         // alert("sendAT('GET ECHO') : 1");
         button_press = 10;
         datem_tid = setInterval(datem_start, 5000);
@@ -136,16 +138,20 @@ function sleep(ms) {
     }
 
     function trace_button_check() {
-      // alert("trace_button_check :"+login_stage);
-        if(login_stage == 3 || login_stage == 1 || login_stage == 2) {
+      //log("trace_button_check :"+login_stage);
+        if(login_stage == 3 || login_stage == 1 || login_stage == 2 || login_stage == 4) 
+        {
           if(isDisconnecting == 0){
               log(' <- TRACE ON');
               sendAT('GET ECHO');
+              //log("2");
               document.getElementById("id_trace").click();
               button_press = 10;
               datem_tid = setInterval(datem_start, 5000); 
               login_stage = 4; // TRACE ON state
               isTraceOn=1;
+              isIgnore=1;
+              isIgnore_2=2;               
           }
         } else {
             log('Device not in passthrough mode!');
@@ -163,6 +169,7 @@ function sleep(ms) {
 
     function trace_off() {  
       //alert("trace_off: isTraceOn="+isTraceOn);
+      //alert('trace_off:login_stage='+login_stage+" isTraceOn="+isTraceOn);
       if(isTraceOn==1){
         sendAT('TRACE OFF');
         document.getElementById('btn_trace').innerHTML ='TRACE ON';
@@ -170,16 +177,17 @@ function sleep(ms) {
         clearTimeout(datem_tid);
         log(' <- TRACE OFF');
         login_stage = 3; // back to the PT mode
+        isIgnore=1;
         isTraceOn=0;
       }else{
-        // start the static timers
+        // start the static timers - TRACE ON case
         document.getElementById('btn_trace').innerHTML ='TRACE OFF';
-        login_stage = 3;
+        login_stage = 4;
         clearTimeout(echo_tid);
         clearTimeout(datem_tid);
         sendAT('TRACE ON');
         trace_button_check();
-        isTraceOn=0;
+        isTraceOn=1;
       } 
     }
 
@@ -377,7 +385,8 @@ async function incomingData(event){
       //alert("button_press="+button_press+" readInValue="+readInValue+"login_stage="+login_stage+" string_check="+string_check);
       //alert(login_stage + " " +isIgnore);
      // alert(string_check + "1");
-      if( (login_stage==3) && (isIgnore==1) )
+     // log("login_stage="+login_stage+" isIgnore="+isIgnore+" isDisconnecting="+isDisconnecting);
+      if( (login_stage==3 || login_stage==4 ) && (isIgnore==1) )
       {
          // alert(string_check + "2");
           isIgnore=0;
@@ -427,9 +436,15 @@ async function incomingData(event){
             openForm();
         }
         else{
-          //alert(string_check+"st");
-          log(" <- " + string_check );
-          //alert(string_check + "2");
+          //log(" ~isIgnore_2= " + isIgnore_2 );
+          
+          //log("ddddd\n"+string_check+" isDisconnecting= "+isDisconnecting);
+          if(isIgnore_2 == 2 || isDisconnecting == 1){
+            if(isIgnore_2==2) isIgnore_2=0;
+          }else{ 
+            log(" <-| " + string_check );
+          }
+          //log(string_check + " 2" +"isIgnore_2="+isIgnore_2);
             // Log the incoming string (format slightly)
           //var res=decoder.decode(readInValue).replace('\r','\r <- ').replace('\n','').replace('\0','');          
           //log(" <- " + sizeof(res) + " "+res);
@@ -517,12 +532,17 @@ async function incomingData(event){
       }
       else if(cmd === 'AT+PT=0'){
         log(' -> Normal mode'   );
+        isIgnore=1;
+		return;
       }
       else if(cmd.includes("AT+AUTH="))      
       {
       }
       else 
           log(' -> Connecting ...'   );
+
+// log("\n cmd="+cmd+" isIgnore="+isIgnore+" login_stage="+login_stage+"\n");
+
 
       // Append an extra character as expected by CodeLess
       var commandToSend = cmd + "\0";
@@ -532,7 +552,16 @@ async function incomingData(event){
         await inboundChar.writeValue(encoder.encode(commandToSend));
       } 
       catch(error) {
-        log('Failed: ' + error);
+        // if( (isDisconnecting==0 &&  isTraceOn==0 && login_stage==4) ||
+        //     (isIgnore==1 && login_stage==3)){ 
+        //       log('skip now: ');
+        // }else{
+          //log(" ~~isIgnore_2= " + isIgnore_2 );
+          if(isIgnore_2 == 2){
+            isIgnore_2=0;
+          }else{
+            log('Failed: ' + error);
+          }        
       }
     }
 
@@ -573,13 +602,14 @@ async function incomingData(event){
 async function sendAT(cmd) {
       // Display the command in the log
       log(' -> ' + cmd );
+     //  log("\n isIgnore_2=" + isIgnore_2 + " cmd="+cmd);
       // Append an extra character as expected by CodeLess
       var commandToSend = cmd + "\0";
       try{
         let encoder = new TextEncoder('utf-8');
         // Send command via GATT Write request 
         await inboundChar.writeValue(encoder.encode(commandToSend));
-      } 
+      }
       catch(error) {
         log('Failed: ' + error);
       }
@@ -595,12 +625,23 @@ async function sendAT(cmd) {
         // Display text in log field text area 
     function log(text)
     {
-      var textarea = document.getElementById('log');
-      if(textarea.value == "")
-        textarea.value = text;
-      else
-        textarea.value += "\n" + text;	  
-      textarea.scrollTop = textarea.scrollHeight;
+       // alert(text);
+       //isDisconnecting
+       /*if(isDisconnecting==0 &&  isTraceOn==1 && login_stage==4) {
+       }
+       else */
+       {
+        var textarea = document.getElementById('log');
+        if(textarea.value == "")
+          textarea.value = text;
+        else{
+          textarea.value += "\n" + text;	  
+          /*textarea.value += "\n"+ "isDisconnecting=" + isDisconnecting;
+          textarea.value += "isTraceOn=" + isTraceOn;
+          textarea.value += "login_stage=" + login_stage+"\n";*/
+          textarea.scrollTop = textarea.scrollHeight;
+        }
+      }
     }
 
     // Clears text in log field text area 
@@ -610,6 +651,16 @@ async function sendAT(cmd) {
       textarea.value = "";	  
       textarea.scrollTop = textarea.scrollHeight;
     }
+    function bleReflectPage()
+    {
+      window.open("https://pulsarmeasurement.com/dbr-radar"); 
+    }
+    function bleLogoExitPage()
+    {
+      window.open("https://pulsarmeasurement.com/"); 
+    }
+
+    
 </script>
 
 <script>
@@ -618,7 +669,7 @@ function myLoadFunction() {
   log("Please click on the 'Device scan' to scan");
 }
 
-  function search(ele) {    
+function search(ele) {    
     if(event.key === 'Enter') {
         //alert(ele.value);
         event.preventDefault();        
@@ -928,7 +979,7 @@ function myLoadFunction() {
           <td>
               <div class="logo">
                 <a href="" style="text-decoration:none;">
-                  <img src="./img/pulsarlogo-old.svg"  alt="Logo" onclick="bleExitPage();" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
+                  <img src="./img/pulsarlogo-old.svg"  alt="Logo" onclick="bleLogoExitPage();" style="width:200px;height:80px;border:none;text-decoration:none;color:#eeeeee00;">
                 </a>
               </div>
           </td>
@@ -942,7 +993,7 @@ function myLoadFunction() {
              <div class="logo1">
               <a href="" style="text-decoration:none;">
                 <!-- <img src="./img/dbr16.png"  alt="Logo" style=" width: 90px;;height: 90px;;border:none;text-decoration:none;color:#eeeeee00;">  -->
-                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleExit1Page();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
+                <img src="./img/Icon256Reflect.png"  alt="Logo" onclick="bleReflectPage();" style=" width: 160px;;height: 160px;;border:none;text-decoration:none;color:#eeeeee00;"> 
               </a>
             </div>
           </td>
