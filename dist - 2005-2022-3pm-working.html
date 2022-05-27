@@ -370,8 +370,7 @@ function sleep(ms) {
     }
 
 
-
-
+ 
 
 
 // Incoming GATT notification was received
@@ -421,6 +420,7 @@ async function incomingData(event){
           if(isDisconnecting == 0){
             log(" <- Connected");
             sendATL('AT+PT=1');
+            //await sleep(3 * 1000);
             setTimeout(trace_button_check, 1000);
           }else {
             await sleep(2 * 1000);
@@ -533,7 +533,7 @@ async function incomingData(event){
       else if(cmd === 'AT+PT=0'){
         log(' -> Normal mode'   );
         isIgnore=1;
-		return;
+		    return;
       }
       else if(cmd.includes("AT+AUTH="))      
       {

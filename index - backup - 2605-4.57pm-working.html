@@ -581,7 +581,7 @@ async function incomingData(event){
       //alert("button_press="+button_press+" readInValue="+readInValue+"login_stage="+login_stage+" string_check="+string_check);
       //alert(login_stage + " " +isIgnore);
      // alert(string_check + "1");
-    // log("login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting+" button_press="+button_press);
+     log("login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting);
 
       if( isIgnore_2 === 2 ){
           isIgnore_2 = 0;          
@@ -593,7 +593,7 @@ async function incomingData(event){
       if(isIgnore==1) 
       {
           isIgnore=0;
-          return; //--> need to check
+           return;
       }
       //alert(string_check + "2");
       if ((button_press == 10) || (button_press == 11) || ((button_press == 8) && ((doc_value == "GET ECHO") || (doc_value == "GET DATEM"))))
@@ -616,10 +616,6 @@ async function incomingData(event){
           //alert("Exit : isIgnore="+isIgnore+" login_stage="+login_stage+" isDisconnecting="+isDisconnecting+" string_check="+string_check);
           login_stage = 0;
         }
-        else if(string_check.includes("PASSTHROUGH failed")){          
-          login_stage = 2;
-          log(" <- Normal mode failed");            
-        }
         else if(string_check.includes("Logged In Success") || (string_check.includes("OK")  && login_stage == 1)){
           login_stage = 2;  // Logged in success mode
           closeForm();
@@ -628,6 +624,7 @@ async function incomingData(event){
             sendATL('AT+PT=1');
             setTimeout(trace_button_check, 1000);
           }else {
+
            // alert(isDisconnecting+" ::"+string_check);
             log(" <- disconnecting");
           }
@@ -674,7 +671,6 @@ async function incomingData(event){
     
     async function bleTDisconnect()
     {
-      //log("login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting+" button_press="+button_press);
       if (device.gatt.connected) {
           device.gatt.disconnect();
           log(" -> Disconnected");
@@ -687,15 +683,12 @@ async function incomingData(event){
       login_stage = 0;
       isDisconnecting=0; // completed
       // isTerminated=0;
-      await sleep(3 * 1000);
     }
 
     async function bleT1Disconnect()
     {
       sendATL('AT+PT=0'); //--> BB: commented
-      await sleep(3 * 1000);
       isDisconnecting=1;
-      // log("login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting+" button_press="+button_press);
       setTimeout(bleTDisconnect,1000);
     }
 
@@ -704,7 +697,6 @@ async function incomingData(event){
       
 	    isIgnore_2=1;
       isDisconnecting=2;
-      //log("login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting+" button_press="+button_press);
 
       // if(login_stage == 4){
       //   sendAT('TRACE OFF');
@@ -756,7 +748,6 @@ async function incomingData(event){
 
       if(cmd === 'AT+PT=1'){
           log(' -> Logging ...'   );
-          await sleep(2 * 1000); // needed 
           isIgnore=1;
       }
       else if(cmd.includes("AT+AUTH="))      
@@ -1370,7 +1361,7 @@ function myLoadFunction() {
                     <tr>
                       <table style="width:30%;">
                         <td style="position: center;">
-                          <button type="button" class="button button-style1" id="btn_trace" onclick="trace_off(); button_press=10;">TRACE OFF</button>
+                          <button type="button" class="button button-style1" id="btn_trace" onclick="trace_off(); button_press=3;">TRACE OFF</button>
                         </td>
                         <td style="position: center;">
                           <button type="center" class="button button-style1" id="btn_mode" onclick="Normal_mode(); button_press = 13">AT MODE</button>
