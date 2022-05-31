@@ -335,7 +335,7 @@ function sleep(ms) {
           sendATL('AT+PT=1');
           //setTimeout(trace_button_check, 1000);
           //log(' <- AT+PT=1');
-          document.getElementById('btn_mode').innerHTML ='ADVANCED MODE';
+          document.getElementById('btn_mode').innerHTML ='AT MODE';
         }
         else  {
           log('No device connected!');
@@ -383,20 +383,12 @@ function sleep(ms) {
     function send_command() {
      // alert("send_command :"+login_stage);
      // log("send_command:: login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting+" button_press="+button_press);
-
-      if(document.getElementById("cmd").value == ""){
-        log(" 🡺 invalid param request");
-        return;  
+      if(login_stage == 4){
+		    log(" 🡺 Press TRACE OFF to get params");
       }
-
-      if(login_stage >= 1) {
-        isIgnore=0;        
-        if(login_stage == 4){
-          log(" 🡺 Press Trace OFF to get params");
-          return;
-        }else{
-          sendAT(document.getElementById('cmd').value); 
-        }        
+      else if(login_stage >= 1) {
+        isIgnore=0;
+        sendAT(document.getElementById('cmd').value);      
         button_press = 8;
       }
       else {
@@ -783,7 +775,7 @@ async function incomingData(event){
       // clearTimeout(datem_tid);
       tids_trace_reset();
       document.getElementById('btn_trace').innerHTML ='TRACE OFF';
-      document.getElementById('btn_mode').innerHTML ='ADVANCED MODE';
+      document.getElementById('btn_mode').innerHTML ='AT MODE';
 
       log(" 🡺 Disconnecting");
       bleT1Disconnect();//setTimeout(bleT1Disconnect,1000);
@@ -909,27 +901,15 @@ async function sendAT(cmd) {
     }
     // If enter key was pressed by user while editing, send command immediately
     function wasEnter(elem) {
-      if(login_stage >= 1) {
+      if(login_stage == 4){
+		    log(" 🡺 Press TRACE OFF to get params");
+      }
+      else if(login_stage >= 1) {
         isIgnore=0;
         if(event.key == 'Enter') {
-
-
-          if(document.getElementById("cmd").value == ""){
-            log(" 🡺 invalid param request");
-            return;  
-          }
-
-
-
-
-          if(login_stage == 4){
-    	      log(" 🡺 Press Trace OFF to get params");
-    	      return;
-	     }else{
           button_press = 8;
           sendAT(document.getElementById("cmd").value);
-         }
-       }
+        }
       }
       else {
         log('No device connected!');
@@ -1391,7 +1371,7 @@ function myLoadFunction() {
     <section class="accordion-tabs">
       <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0" id="id_home">Home</button>
       <button class="accordion-tab" data-actab-group="0" data-actab-id="1" id="id_trace">Trace</button>
-      <button class="accordion-tab" data-actab-group="0" data-actab-id="2" id="id_parameters">Settings</button>      
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="2" id="id_parameters">Parameters</button>      
     </section>
     <section class="accordion-content">
       <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
@@ -1476,13 +1456,13 @@ function myLoadFunction() {
                           <button type="button" class="button button-style1" id="btn_trace" onclick="button_press=10; trace_off();">TRACE OFF</button>
                         </td>
                         <td style="position: center;">
-                          <button type="center" class="button button-style1" id="btn_mode" onclick="button_press = 13; Normal_mode();">ADVANCED MODE</button>
+                          <button type="center" class="button button-style1" id="btn_mode" onclick="button_press = 13; Normal_mode();">AT MODE</button>
                         </td>
-                        <td>
-                          <button type="button" class="button" onclick="clearlog(); button_press = 9">
-                            CLEAR
-                          </button>
-                        </td>
+                      <td>
+                        <button type="button" class="button" onclick="clearlog(); button_press = 9">
+                          CLEAR
+                      </button>
+                      </td>
                       </table>
                       
                     </tr>                    
