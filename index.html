@@ -117,6 +117,8 @@ function sleep(ms) {
     var datem_tid;
     var p104_tid;
     var p605_tid;
+    var param_tid;
+    var param_query=0;
     var isDisconnecting=0;
     var isTerminated=0;
 
@@ -219,6 +221,64 @@ function sleep(ms) {
       return val_to_convert;      
     }
 
+    function settings_clear() {
+      document.getElementById("p100-box").value = "";
+      document.getElementById("p104-box").value = "";
+      document.getElementById("p105-box").value = "";
+      document.getElementById("p106-box").value = "";
+      document.getElementById("p808-box").value = "";
+      document.getElementById("p605-box").value = "";
+      document.getElementById("p21-box").value = "";
+    }
+
+    function param_update() {
+      if(login_stage >= 3) {
+        tids_trace_reset();
+        // settings_clear();
+        param_query = 0;
+        param_tid = setInterval(param_start, 1000);
+      }
+    }
+
+    function param_start() {
+      if(login_stage >= 3) {
+        switch (param_query) {
+          case 0:
+            button_press = 20;
+            sendAT('/P100');
+            break;
+          case 1:
+            button_press = 21;
+            sendAT('/P104');
+            break;
+          case 2:
+            button_press = 22;
+            sendAT('/P105');
+            break;
+          case 3:
+            button_press = 23;
+            sendAT('/P106');
+            break;
+          case 4:
+            button_press = 24;
+            sendAT('/P808');
+            break;
+          case 5:
+            button_press = 25;
+            sendAT('/P605');
+            break;
+          case 6:
+            button_press = 26;
+            sendAT('/P21');
+            break;
+          case 7:
+            button_press = 0;
+            clearTimeout(param_tid);
+            break;
+        }
+      }
+    }
+
     function echo_start() {
     // do some stuff...
     // no need to recall the function (it's an interval, it'll loop forever)
@@ -230,6 +290,7 @@ function sleep(ms) {
         clearTimeout(echo_tid);
         clearTimeout(p104_tid);
         clearTimeout(p605_tid);
+        clearTimeout(param_tid);
     } else {
         // clearTimeout(p104_tid);
         // clearTimeout(p605_tid);
@@ -246,6 +307,7 @@ function sleep(ms) {
             clearTimeout(datem_tid);
             clearTimeout(p104_tid);
             clearTimeout(p605_tid);
+            clearTimeout(param_tid);
         } else {
             // clearTimeout(p104_tid);
             // clearTimeout(p605_tid);
@@ -263,6 +325,7 @@ function sleep(ms) {
             clearTimeout(p605_tid);
             clearTimeout(echo_tid);
             clearTimeout(datem_tid);
+            clearTimeout(param_tid);
         } else {
             // clearTimeout(p104_tid);
             // clearTimeout(p605_tid);
@@ -280,6 +343,7 @@ function sleep(ms) {
             clearTimeout(p104_tid);
             clearTimeout(echo_tid);
             clearTimeout(datem_tid);
+            clearTimeout(param_tid);
         } else {
             // clearTimeout(p104_tid);
             // clearTimeout(p605_tid);
@@ -305,6 +369,7 @@ function sleep(ms) {
               clearTimeout(p605_tid);
               clearTimeout(echo_tid);
               clearTimeout(datem_tid);
+              clearTimeout(param_tid);
               button_press = 14;
 
               login_stage = 4; // TRACE ON state
@@ -334,6 +399,7 @@ function sleep(ms) {
           clearTimeout(p605_tid);
           clearTimeout(echo_tid);
           clearTimeout(datem_tid);
+          clearTimeout(param_tid);
           sendATL('AT+PT=1');
           //setTimeout(trace_button_check, 1000);
           //log(' <- AT+PT=1');
@@ -350,6 +416,7 @@ function sleep(ms) {
       clearTimeout(p605_tid);
       clearTimeout(echo_tid);
       clearTimeout(datem_tid);
+      clearTimeout(param_tid);
       isTraceOn=0;
     }
 
@@ -370,8 +437,11 @@ function sleep(ms) {
           // start the static timers
           document.getElementById('btn_trace').innerHTML ='TRACE OFF';
           login_stage = 3;
+          clearTimeout(p104_tid);
+          clearTimeout(p605_tid);
           clearTimeout(echo_tid);
           clearTimeout(datem_tid);
+          clearTimeout(param_tid);
           // sendAT('TRACE ON');
           isTraceOn=1;
           trace_button_check();
@@ -592,8 +662,10 @@ function sleep(ms) {
     }
 
     function populate_params(string_val){
-      if(string_val.includes("/P100:"))
+      if(string_val.includes("/P100:")) {
         document.getElementById('p100-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
+        param_query = 1;
+      }
       else if(string_val.includes("/P104:")) {
         document.getElementById('p104-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
         p104_units_val = parseInt(document.getElementById('p104-box').value);
@@ -604,15 +676,23 @@ function sleep(ms) {
           clearTimeout(p104_tid);
           clearTimeout(echo_tid);
           clearTimeout(datem_tid);
+          clearTimeout(param_tid);
           button_press = 14;
         }
+        param_query = 2;
       }
-      else if(string_val.includes("/P105:"))
+      else if(string_val.includes("/P105:")) {
         document.getElementById('p105-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
-      else if(string_val.includes("/P106:"))
+        param_query = 3;
+      }
+      else if(string_val.includes("/P106:")) {
         document.getElementById('p106-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
-      else if(string_val.includes("/P808:"))
+        param_query = 4;
+      }
+      else if(string_val.includes("/P808:")) {
         document.getElementById('p808-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
+        param_query = 5;
+      }
       else if(string_val.includes("/P605:")) {
         document.getElementById('p605-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
         p605_units_val = parseInt(document.getElementById('p605-box').value);
@@ -627,10 +707,14 @@ function sleep(ms) {
           clearTimeout(p605_tid);
           clearTimeout(datem_tid);
           clearTimeout(p104_tid);
-        }        
+          clearTimeout(param_tid);
+        }
+        param_query = 6;     
       }
-      else if(string_val.includes("/P21:"))
+      else if(string_val.includes("/P21:")) {
         document.getElementById('p21-box').value = string_val.slice(string_val.lastIndexOf(':') + 1);//string_val.substring(string_val.indexOf(':') + 1);
+        param_query = 7;
+      }
     }
 
 
@@ -961,49 +1045,49 @@ async function sendAT(cmd) {
               sendAT('/P100');
             else
               sendAT('/P100:'+ document.getElementById("p100-box").value);
-            document.getElementById("p100-box").value == "";
+              document.getElementById("p100-box").value = "";
             break;
           case 21:
             if(document.getElementById("p104-box").value == "")
               sendAT('/P104');
             else
               sendAT('/P104:'+ document.getElementById("p104-box").value);
-            document.getElementById("p104-box").value == "";         
+            document.getElementById("p104-box").value = "";         
             break;
           case 22:
             if(document.getElementById("p105-box").value == "")
               sendAT('/P105');
             else
               sendAT('/P105:'+ document.getElementById("p105-box").value);
-            document.getElementById("p105-box").value == "";    
+            document.getElementById("p105-box").value = "";    
             break;
           case 23:
             if(document.getElementById("p106-box").value == "")
               sendAT('/P106');
             else
               sendAT('/P106:'+ document.getElementById("p106-box").value);            
-            document.getElementById("p106-box").value == "";
+            document.getElementById("p106-box").value = "";
             break;
           case 24:
             if(document.getElementById("p808-box").value == "")
               sendAT('/P808');
             else
               sendAT('/P808:'+ document.getElementById("p808-box").value);
-            document.getElementById("p808-box").value == "";        
+            document.getElementById("p808-box").value = "";        
             break;
           case 25:
             if(document.getElementById("p605-box").value == "")
               sendAT('/P605');
             else
               sendAT('/P605:'+ document.getElementById("p605-box").value);
-            document.getElementById("p605-box").value == "";           
+            document.getElementById("p605-box").value = "";           
             break;                        
           case 26:
             if(document.getElementById("p21-box").value == "")
               sendAT('/P21');
             else
               sendAT('/P21:'+ document.getElementById("p21-box").value);
-            document.getElementById("p21-box").value == "";        
+            document.getElementById("p21-box").value = "";        
             break; 
           default:
             break;
@@ -1412,7 +1496,7 @@ function myLoadFunction() {
     <section class="accordion-tabs">
       <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0" id="id_home" onclick="c_state=0;updateState(c_state);" >Home</button>
       <button class="accordion-tab" data-actab-group="0" data-actab-id="1" id="id_trace" onclick="c_state=1;updateState(c_state);">Trace</button>
-      <button class="accordion-tab" data-actab-group="0" data-actab-id="2" id="id_parameters" onclick="c_state=2;updateState(c_state);">Settings</button>      
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="2" id="id_parameters" onclick="c_state=2;updateState(c_state); param_update();">Settings</button>      
     </section>
     <section class="accordion-content">
       <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
