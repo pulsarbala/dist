@@ -114,7 +114,7 @@
     /* background: #668992; */
     /* background: rgb(155, 156, 160);*/ /* Gray  */
     background: rgb(228, 236, 237); /*  Platinum  */
-    min-height:1260px;  /*change here for the content width and height */
+    min-height: 1024px;/*1260px;*/  /*change here for the content width and height */
     min-width: 1340px;
   }
   .accordion-item__label, .accordion-item__container {

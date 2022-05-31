@@ -380,7 +380,7 @@ function sleep(ms) {
           log('Device not in Normal mode!');//log('Device not in passthrough mode!');
         }
     }
-    function Normal_mode() {
+    function Normal_mode() {        
         if(login_stage >= 3) { // currently in PT mode
           sendAT('AT+PT=0');
           // clearTimeout(echo_tid);
@@ -980,8 +980,8 @@ async function incomingData(event){
         log('Ready to communicate!\n');
         login_stage = 1;
         // sendATL('AT+AUTH=123321'); //--> BB: commented
-        //sendATL('AT+AUTH=123654'); //--> BB: commented
-        sendATL('AT+AUTH=000000'); //--> BB: commented
+        sendATL('AT+AUTH=123654'); //--> BB: commented
+        // sendATL('AT+AUTH=000000'); //--> BB: commented
         button_press = 3;
       }
       catch(error) {
@@ -1578,10 +1578,16 @@ function myLoadFunction() {
                     <tr>
                       <table style="width:30%;">
                         <td style="position: center;">
-                          <button type="button" class="button button-style1" id="btn_trace" onclick="button_press=10; trace_off();">TRACE OFF</button>
+                          <button type="button" class="button button-style1" id="btn_trace1" onclick="button_press=10; trace_off();">TRACE OFF</button>
+                          <script>
+                            document.getElementById("btn_trace1").style.visibility="hidden";
+                          </script>
                         </td>
                         <td style="position: center;">
-                          <button type="center" class="button button-style1" id="btn_mode" onclick="button_press = 13; Normal_mode();">ADVANCED MODE</button>
+                          <button type="center" class="button button-style1" id="btn_mode" visibility="hidden" onclick="button_press = 13; Normal_mode();">ADVANCED MODE</button>
+                          <script>
+                            document.getElementById("btn_mode").style.visibility="hidden";
+                          </script>
                         </td>
                         <td>
                           <button type="button" class="button" onclick="clearlog(); button_press = 9">
@@ -1828,6 +1834,30 @@ function myLoadFunction() {
                 <textarea id="data-log_t" class="textarea2" rows="4" cols="1" style="font-size: 22pt; font-weight: bold; width:395px; height:110px;" readonly>data-log_t</textarea>                
               </td>
           </tr>
+        </table>
+        <table style="width:52%;">
+          <tr>
+            <table style="width:30%;">
+              <td style="position: center;">
+                <button type="center" class="button button-style1" id="btn_mode2" visibility="hidden" onclick="button_press = 13; Normal_mode();">ADVANCED MODE</button>
+                <script>
+                  document.getElementById("btn_mode2").style.visibility="hidden";
+                </script>
+              </td>
+              <td style="position: center;">
+                <button type="button" class="button button-style1" id="btn_trace" onclick="button_press=10; trace_off();">TRACE OFF</button>
+                <!-- <script>
+                  document.getElementById("btn_trace").style.visibility="hidden";
+                </script> -->
+              </td>
+              <!-- <td>
+                <button type="button" class="button" id="btn_clear2" onclick="clearlog(); button_press = 9">
+                  CLEAR
+                </button>
+              </td> -->
+            </table>
+            
+          </tr>                    
         </table>
       </article>
 
