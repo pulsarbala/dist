@@ -41,7 +41,6 @@ function sleep(ms) {
 
 <script>
     var sysState=0; // 0- Trace on state, 
-    var c_state=0;
     var inboundChar;
     var outboundChar;
     var device;
@@ -646,17 +645,12 @@ async function incomingData(event){
       //alert(login_stage + " " +isIgnore);
       // alert(string_check + "1");
       //log("login_stage="+login_stage+" isIgnore="+isIgnore+" isIgnore_2="+isIgnore_2+" isDisconnecting="+isDisconnecting+" button_press="+button_press);
-      
-      
-
-
 
       if( isIgnore_2 === 2 ){ //NEED TO CHECK
           isIgnore_2 = 0;          
           //await sleep(2 * 1000);
           //return;
       }
-
       
 
       if(isIgnore==1) 
@@ -664,9 +658,6 @@ async function incomingData(event){
           isIgnore=0;
           return; //--> need to check
       }
-
-     
-
       //alert(string_check + "2");
       if ((button_press == 10) || (button_press == 11) || ((button_press == 8) && ((doc_value == "GET ECHO") || (doc_value == "GET DATEM"))))
       {
@@ -721,13 +712,9 @@ async function incomingData(event){
             await sleep(2 * 1000);
           }
           
-          
-          if( disp == 0){          
-            if(sysState == 2 && string_check.length > 12){
-              //log(" 🡸 param state" + sysState );
-            }else {
-              log(" 🡸 " + string_check );
-            }
+
+          if( disp == 0){
+            log(" 🡸 " + string_check );
           }
           
           //alert(string_check + "2");
@@ -1335,13 +1322,6 @@ function myLoadFunction() {
     
     document.getElementById("myForm").style.display = "none";
   }
-  function updateState(cur_state) {
-    // log(cur_state);
-    sysState=cur_state;
-  }
-
-  
-
   </script>
 
 
@@ -1410,9 +1390,9 @@ function myLoadFunction() {
       </table>            
     </section>
     <section class="accordion-tabs">
-      <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0" id="id_home" onclick="c_state=0;updateState(c_state);" >Home</button>
-      <button class="accordion-tab" data-actab-group="0" data-actab-id="1" id="id_trace" onclick="c_state=1;updateState(c_state);">Trace</button>
-      <button class="accordion-tab" data-actab-group="0" data-actab-id="2" id="id_parameters" onclick="c_state=2;updateState(c_state);">Settings</button>      
+      <button class="accordion-tab accordion-active" data-actab-group="0" data-actab-id="0" id="id_home">Home</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="1" id="id_trace">Trace</button>
+      <button class="accordion-tab" data-actab-group="0" data-actab-id="2" id="id_parameters">Settings</button>      
     </section>
     <section class="accordion-content">
       <article class="accordion-item accordion-active" data-actab-group="0" data-actab-id="0">
