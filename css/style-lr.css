@@ -166,7 +166,7 @@ body {
   font-size: 1rem;
   justify-content: center;
   align-items: center;
-  height: 120vh; 
+  height: 100%;/*120vh; */
 }
 
 
